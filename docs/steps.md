@@ -90,6 +90,6 @@ tests green. Nothing is deployed.
 
 ### Finish
 
-- [ ] 6.1 Push `dev` and check that CI passes on GitHub.
+- [x] 6.1 Push `dev` and check that CI passes on GitHub.
 - [ ] 6.2 Merge `dev` into `main` and push. (Render isn't set up yet, so
       nothing deploys.)
