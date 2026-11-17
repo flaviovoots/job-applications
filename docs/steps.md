@@ -77,41 +77,19 @@ tests green. Nothing is deployed.
       fail (the red step). Without `TZ=UTC` it falls back to the machine's
       zone, which isn't UTC either, so it still passes.
 - [x] 4.4 Write `client/src/tz.guard.test.ts` the same way.
-- [ ] Commit point: test runner and guard tests.
+- [x] Commit point: test runner and guard tests.
 
 ### CI and docs
 
-- [ ] 5.1 Type `.github/workflows/ci.yml`.
-- [ ] 5.2 Type `README.md`.
-- [ ] 5.3 Type `docs/acceptance-checklist.md` (the two tables, no lines yet).
-- [ ] 5.4 Type `docs/decision-log.md` (the first entry).
-- [ ] 5.5 Run `lint`, `format`, `typecheck`, `test` and `build` locally.
-- [ ] Commit point: CI and docs.
+- [x] 5.1 Type `.github/workflows/ci.yml`.
+- [x] 5.2 Type `README.md`.
+- [x] 5.3 Type `docs/acceptance-checklist.md` (the two tables, no lines yet).
+- [x] 5.4 Type `docs/decision-log.md` (the first entry).
+- [x] 5.5 Run `lint`, `format`, `typecheck`, `test` and `build` locally.
+- [x] Commit point: CI and docs.
 
 ### Finish
 
 - [ ] 6.1 Push `dev` and check that CI passes on GitHub.
 - [ ] 6.2 Merge `dev` into `main` and push. (Render isn't set up yet, so
       nothing deploys.)
-
-### For the decision log (step 5.4)
-
-Changes to the design's Stage 0 table, made during the stage:
-
-- The root `.gitignore` also ignores `*.local` (Vite's `.env.local` files).
-- `public/` is gone, including the Vite-logo favicon and its `<link>`.
-- `App.tsx` returns `null` in Stage 0, so Stage 1's test fails first.
-- `package.json` has no `license` field (all rights reserved).
-- `config.mongodbMemoryServer` moves to Stage 1.
-- pnpm 12.18.0 is installed globally with npm. Letting pnpm 10 switch to it
-  fails on Windows.
-- Prettier is pinned to an exact version (`--save-exact`), as its install
-  guide recommends, because patch releases can change formatting.
-- `server/tsconfig.json` also sets `"lib": ["es2023"]`, so DOM globals don't
-  type-check in server code (the template's `tsconfig.node.json` does the
-  same). It keeps `tsc --init`'s `isolatedModules`,
-  `noUncheckedSideEffectImports`, `moduleDetection: "force"` and
-  `skipLibCheck`, and drops the rest of its extras (source maps,
-  declarations, `jsx`, `noUncheckedIndexedAccess`,
-  `exactOptionalPropertyTypes`), so `shared/` type-checks the same way on
-  both sides.
