@@ -20,6 +20,9 @@ tests green. Nothing is deployed.
       on Windows, pnpm 10 downloads pnpm 12 without running its install
       script, and the result can't start ("is not recognized"). If that
       happened, run `rm -rf "$LOCALAPPDATA/pnpm/.tools/pnpm/12.18.0"`.
+      If `which -a pnpm` lists a standalone pnpm in `$LOCALAPPDATA/pnpm`
+      before npm's copy, rename its `pnpm`, `pnpm.CMD`, `pnpx` and
+      `pnpx.CMD` shims to `*.bak` so npm's pnpm 12.18.0 runs.
 
 ### Repository basics
 
@@ -50,16 +53,16 @@ tests green. Nothing is deployed.
 - [x] 2.6 Add Tailwind (typed from its install guide): the Vite plugin, and the
       one-line `client/src/index.css`. Add `envDir` and `envPrefix` to
       `client/vite.config.ts`.
-- [ ] Commit point: client template and packages.
+- [x] Commit point: client template and packages.
 
 ### Tooling
 
-- [ ] 3.1 Type `.prettierrc` and `.prettierignore`.
-- [ ] 3.2 Generate `server/tsconfig.json` with `tsc --init`, review it,
+- [x] 3.1 Type `.prettierrc` and `.prettierignore`.
+- [x] 3.2 Generate `server/tsconfig.json` with `tsc --init`, review it,
       then edit it to the settings in the plan.
-- [ ] 3.3 Type `tsconfig.test.json`.
-- [ ] 3.4 Type the one-line `server/src/index.ts` placeholder.
-- [ ] 3.5 Run `pnpm format:write` once, so the generated files pass `format`.
+- [x] 3.3 Type `tsconfig.test.json`.
+- [x] 3.4 Type the one-line `server/src/index.ts` placeholder.
+- [x] 3.5 Run `pnpm format:write` once, so the generated files pass `format`.
 - [ ] Commit point: tooling.
 
 ### Tests
@@ -97,3 +100,13 @@ Changes to the design's Stage 0 table, made during the stage:
 - `config.mongodbMemoryServer` moves to Stage 1.
 - pnpm 12.18.0 is installed globally with npm. Letting pnpm 10 switch to it
   fails on Windows.
+- Prettier is pinned to an exact version (`--save-exact`), as its install
+  guide recommends, because patch releases can change formatting.
+- `server/tsconfig.json` also sets `"lib": ["es2023"]`, so DOM globals don't
+  type-check in server code (the template's `tsconfig.node.json` does the
+  same). It keeps `tsc --init`'s `isolatedModules`,
+  `noUncheckedSideEffectImports`, `moduleDetection: "force"` and
+  `skipLibCheck`, and drops the rest of its extras (source maps,
+  declarations, `jsx`, `noUncheckedIndexedAccess`,
+  `exactOptionalPropertyTypes`), so `shared/` type-checks the same way on
+  both sides.

@@ -1,0 +1,8 @@
+{
+  "extends": "./server/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["server/src", "server/test", "shared", "vitest.config.ts"],
+  "exclude": []
+}
