@@ -63,15 +63,20 @@ tests green. Nothing is deployed.
 - [x] 3.3 Type `tsconfig.test.json`.
 - [x] 3.4 Type the one-line `server/src/index.ts` placeholder.
 - [x] 3.5 Run `pnpm format:write` once, so the generated files pass `format`.
-- [ ] Commit point: tooling.
+- [x] Commit point: tooling.
 
 ### Tests
 
-- [ ] 4.1 Type `vitest.config.ts` (two projects, `TZ` set at the top).
-- [ ] 4.2 Type `client/src/test/setup.ts`.
-- [ ] 4.3 Write `server/test/tz.guard.test.ts` and watch it pass, then
-      temporarily remove the `TZ` line to watch it fail (the red step).
-- [ ] 4.4 Write `client/src/tz.guard.test.ts` the same way.
+- [x] 4.0 Install the test packages, and `tsx` for `dev:server`:
+      `pnpm add -D vitest jsdom @testing-library/react @testing-library/dom tsx`.
+      Approve or deny build scripts as they come up.
+- [x] 4.1 Type `vitest.config.ts` (two projects, `TZ` set at the top).
+- [x] 4.2 Type `client/src/test/setup.ts`.
+- [x] 4.3 Write `server/test/tz.guard.test.ts` and watch it pass, then
+      temporarily remove the `TZ` line and run it with `TZ=UTC` to watch it
+      fail (the red step). Without `TZ=UTC` it falls back to the machine's
+      zone, which isn't UTC either, so it still passes.
+- [x] 4.4 Write `client/src/tz.guard.test.ts` the same way.
 - [ ] Commit point: test runner and guard tests.
 
 ### CI and docs
