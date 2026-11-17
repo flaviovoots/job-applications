@@ -14,8 +14,12 @@ tests green. Nothing is deployed.
 
 - [x] 0.1 Install Node 24 (the 24.x line, not the newest LTS), and check that
       `node -v` prints `v24.`.
-- [x] 0.2 Check that `pnpm -v` works. Once `packageManager` is set (step 2.3),
-      pnpm switches to 12.18.0 by itself inside this repository.
+- [x] 0.2 Install pnpm 12.18.0 globally, from outside the repository:
+      `npm i -g pnpm@12.18.0`, then check that `pnpm -v` prints `12.18.0`.
+      Don't rely on an older pnpm switching to the `packageManager` version:
+      on Windows, pnpm 10 downloads pnpm 12 without running its install
+      script, and the result can't start ("is not recognized"). If that
+      happened, run `rm -rf "$LOCALAPPDATA/pnpm/.tools/pnpm/12.18.0"`.
 
 ### Repository basics
 
@@ -28,15 +32,22 @@ tests green. Nothing is deployed.
 
 ### Packages and the client template
 
-- [ ] 2.1 Generate the client with the Vite react-ts template, then review
+- [x] 2.1 Generate the client with the Vite react-ts template, then review
       each generated file line by line.
-- [ ] 2.2 Delete the demo files and the template's `client/README.md` and lint
-      config. Merge `client/.gitignore` into the root one.
-- [ ] 2.3 Create the root `package.json`, merge in the template's
-      `package.json`, then delete the template's copy.
-- [ ] 2.4 Type `pnpm-workspace.yaml`.
-- [ ] 2.5 Run `pnpm install`, and approve or deny build scripts as they come up.
-- [ ] 2.6 Add Tailwind (typed from its install guide): the Vite plugin, and the
+- [x] 2.2 Delete the demo files (`src/App.css`, `src/assets/`, all of
+      `public/`, including the Vite-logo favicon) and the template's
+      `client/README.md` and `.oxlintrc.json`. Type `App.tsx` down to a
+      component that returns `null` (Stage 1 writes its test first). Remove the
+      favicon `<link>` from `index.html`. Merge `client/.gitignore` into the
+      root one: only `*.local` is new (Vite's `.env.local` files), then
+      delete `client/.gitignore`.
+- [x] 2.3 Create the root `package.json`, merge in the template's
+      `package.json`, then delete the template's copy. No `license` field.
+      `config.mongodbMemoryServer` moves to Stage 1, when
+      `mongodb-memory-server` is installed.
+- [x] 2.4 Type `pnpm-workspace.yaml`.
+- [x] 2.5 Run `pnpm install`, and approve or deny build scripts as they come up.
+- [x] 2.6 Add Tailwind (typed from its install guide): the Vite plugin, and the
       one-line `client/src/index.css`. Add `envDir` and `envPrefix` to
       `client/vite.config.ts`.
 - [ ] Commit point: client template and packages.
@@ -74,3 +85,15 @@ tests green. Nothing is deployed.
 - [ ] 6.1 Push `dev` and check that CI passes on GitHub.
 - [ ] 6.2 Merge `dev` into `main` and push. (Render isn't set up yet, so
       nothing deploys.)
+
+### For the decision log (step 5.4)
+
+Changes to the design's Stage 0 table, made during the stage:
+
+- The root `.gitignore` also ignores `*.local` (Vite's `.env.local` files).
+- `public/` is gone, including the Vite-logo favicon and its `<link>`.
+- `App.tsx` returns `null` in Stage 0, so Stage 1's test fails first.
+- `package.json` has no `license` field (all rights reserved).
+- `config.mongodbMemoryServer` moves to Stage 1.
+- pnpm 12.18.0 is installed globally with npm. Letting pnpm 10 switch to it
+  fails on Windows.
