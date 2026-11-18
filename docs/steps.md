@@ -164,7 +164,7 @@ app's name; the closing docs commit stays on `dev` until Stage 2's merge.
 
 Each step: write the test, watch it fail, then make it pass.
 
-- [ ] 3.1 `server/test/config.test.ts`, then `server/src/config.ts`.
+- [x] 3.1 `server/test/config.test.ts`, then `server/src/config.ts`.
       `readConfig(env)` returns `{ mongodbUri, port, commit, clientDir }`.
       A missing or empty `MONGODB_URI` and a `PORT` that isn't a whole
       number from 1 to 65535 are each named in one error, joined with `; `,
