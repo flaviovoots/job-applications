@@ -11,10 +11,10 @@ describe("assertTestUri", () => {
   });
 
   it("refuses an Atlas host without printing the URI", () => {
-    const uri =
-      "mongodb+srv://jobs-dev:s3cretPass@jobs.example.mongodb.net/test-abc";
+    const password = "s3cretPass";
+    const uri = `mongodb+srv://jobs-dev:${password}@jobs.example.mongodb.net/test-abc`;
     expect(() => assertTestUri(uri)).toThrow(/^Refusing to connect/);
-    expect(() => assertTestUri(uri)).not.toThrow(/s3cretPass/);
+    expect(() => assertTestUri(uri)).not.toThrow(new RegExp(password));
   });
 
   it("refuses localhost", () => {
