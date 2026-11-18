@@ -171,35 +171,35 @@ Each step: write the test, watch it fail, then make it pass.
       and no value appears in the message (the test uses a distinctive bad
       `PORT` value and checks it's absent). `commit` is `RENDER_GIT_COMMIT`
       or `"dev"`. A missing or empty `PORT` gives 3000.
-- [ ] Commit point: config.
-- [ ] 3.2 `pnpm add express pino pino-http helmet` and
+- [x] Commit point: config.
+- [x] 3.2 `pnpm add express pino pino-http helmet` and
       `pnpm add -D supertest @types/express @types/supertest`. Approve or
       deny build scripts as they come up. Type
       `server/test/fixtures/client/index.html` and
       `server/test/fixtures/client/assets/test.js`. Add `testConfig()` to
       `helpers.ts`, with `clientDir` set to the fixtures folder.
-- [ ] 3.3 `app.test.ts`: `GET /api/anything` and `GET /auth/anything` give
+- [x] 3.3 `app.test.ts`: `GET /api/anything` and `GET /auth/anything` give
       a JSON 404 `{ error: "Not found", requestId }`. This brings in
       `apiNotFound` (`errors.ts`), `createApp({ config, logger })` with
       `trust proxy` set to 1 (`app.ts`), and `createLogger({ destination?,
       level? })` plus the pino-http options with `genReqId` (`logger.ts`).
       Tests pass `createLogger({ level: "silent" })`.
-- [ ] 3.4 `app.test.ts`: the 404 has an `X-Request-Id` header equal to its
+- [x] 3.4 `app.test.ts`: the 404 has an `X-Request-Id` header equal to its
       `requestId`. (3.6 and 3.7 add the same check to their responses.)
-- [ ] 3.5 `server/test/errors.test.ts`, then `errorHandler` in `errors.ts`,
+- [x] 3.5 `server/test/errors.test.ts`, then `errorHandler` in `errors.ts`,
       on a small Express app with throwing routes: `HttpError` gives its
       status, `error` and `fields`; an error with a 4xx `status` gives that
       status with `"Not found"` for 404 and `"Invalid request body"`
       otherwise; a `CastError` gives 404; anything else gives 500
       `"Something went wrong"`. Every body has the `requestId`.
-- [ ] 3.6 `app.test.ts`: `/assets/missing.js` gives 404, not `index.html`;
+- [x] 3.6 `app.test.ts`: `/assets/missing.js` gives 404, not `index.html`;
       `/assets/test.js` has `Cache-Control` with a one-year `max-age` and
       `immutable`; `/` and `/anything` give `index.html` with
       `Cache-Control: no-cache`.
-- [ ] 3.7 `app.test.ts`: the CSP header names `accounts.google.com/gsi/`
+- [x] 3.7 `app.test.ts`: the CSP header names `accounts.google.com/gsi/`
       and has `frame-ancestors 'none'`; COOP is `same-origin-allow-popups`.
       This brings in `securityHeaders()` (`security.ts`).
-- [ ] 3.8 `server/test/logger.test.ts`: a small Express app with the
+- [x] 3.8 `server/test/logger.test.ts`: a small Express app with the
       pino-http options and a capture stream as the destination, and one
       route that sets a cookie. A POST with `Cookie`, `Authorization` and a
       JSON body is logged with the cookie, authorization and `set-cookie`
