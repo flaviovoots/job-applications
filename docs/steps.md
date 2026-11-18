@@ -110,43 +110,43 @@ app's name; the closing docs commit stays on `dev` until Stage 2's merge.
 ### Start
 
 - [x] 0.1 Tick Stage 0's 6.2 and write these steps.
-- [ ] Commit point: Stage 1 steps.
+- [x] Commit point: Stage 1 steps.
 
 ### Atlas
 
-- [ ] 1.1 Create the Free cluster on AWS `us-east-1` (matches Render's
+- [x] 1.1 Create the Free cluster on AWS `us-east-1` (matches Render's
       Virginia region).
-- [ ] 1.2 Create users `jobs-prod` and `jobs-dev`, each with `readWrite` on
+- [x] 1.2 Create users `jobs-prod` and `jobs-dev`, each with `readWrite` on
       its own database only (`jobs_prod` or `jobs_dev`), with a random
       password of at least 24 characters from the password manager. Use
       letters and digits only, so the password needs no URL encoding in the
       URI. Set network access to `0.0.0.0/0`. Create no database or
       collection by hand.
-- [ ] 1.3 Note the cluster's exact MongoDB version (an 8.0 patch, for
-      example `8.0.x`). If the dashboard shows only the major version, run
+- [x] 1.3 Note the cluster's exact MongoDB version (an 8.0 patch, for
+      example `8.0.x`) → 8.0.37. If the dashboard shows only the major version, run
       `db.version()` in the Atlas shell or Compass.
-- [ ] 1.4 Set `MONGODB_URI` in the local `.env` to the `jobs-dev` URI, with
+- [x] 1.4 Set `MONGODB_URI` in the local `.env` to the `jobs-dev` URI, with
       `/jobs_dev` in its path:
       `mongodb+srv://jobs-dev:<password>@<cluster-host>/jobs_dev?retryWrites=true&w=majority`.
       Store both URIs in the password manager.
 
 ### Test database
 
-- [ ] 2.1 `pnpm add -D mongodb-memory-server` (its build script is already
+- [x] 2.1 `pnpm add -D mongodb-memory-server` (its build script is already
       denied in `pnpm-workspace.yaml`). Add to `package.json`:
       `"config": { "mongodbMemoryServer": { "version": "<1.3's version>",
       "preferGlobalPath": true } }`.
-- [ ] 2.2 In `ci.yml`, add an `actions/cache` step (current major, checked
+- [x] 2.2 In `ci.yml`, add an `actions/cache` step (current major, checked
       in its README) before `pnpm test`, with path
       `~/.cache/mongodb-binaries` and key
       `mongodb-binaries-${{ runner.os }}-<1.3's version>`. The version
       appears in `package.json` and here; change both together.
-- [ ] 2.3 Type `server/test/setup/globalSetup.ts`: start one
+- [x] 2.3 Type `server/test/setup/globalSetup.ts`: start one
       `MongoMemoryServer`, `provide('mongoUri', uri)`, and return a
       teardown that stops it. Declare `mongoUri: string` in Vitest's
       `ProvidedContext`. Add `globalSetup` to the `server` project in
       `vitest.config.ts`.
-- [ ] 2.4 `pnpm add mongoose mongodb`. Write `server/test/helpers.test.ts`,
+- [x] 2.4 `pnpm add mongoose mongodb`. Write `server/test/helpers.test.ts`,
       then `server/test/helpers.ts`:
       - `assertTestUri(uri)` throws unless the host is `127.0.0.1` and the
         database name starts with `test-`. Tested with an Atlas-style host,
@@ -155,10 +155,10 @@ app's name; the closing docs commit stays on `dev` until Stage 2's merge.
         of `inject('mongoUri')`, calls `assertTestUri`, connects Mongoose,
         and returns the URI (connect-mongo uses it in Stage 2).
       - `disconnectTestDb()` drops that database and disconnects.
-- [ ] 2.5 Run `pnpm test`. The first run downloads mongod into
+- [x] 2.5 Run `pnpm test`. The first run downloads mongod into
       `~/.cache/mongodb-binaries` (`%USERPROFILE%\.cache\mongodb-binaries`
       on Windows).
-- [ ] Commit point: test database.
+- [x] Commit point: test database.
 
 ### Server
 
@@ -281,5 +281,6 @@ Each step: write the test, watch it fail, then make it pass.
       the three outcomes happened.
 - [ ] 6.8 Add a decision log entry: region, Atlas version, the health
       check result (6.4), the idle outcome (6.7), and the changes listed at
-      the top of this stage. Tick the steps.
+      the top of this stage. Tick the steps;
+      mongodb uses Mongoose's range (~7.8), so the app has one driver.
 - [ ] Commit point: Stage 1 results (stays on `dev` until Stage 2's merge).

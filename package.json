@@ -6,6 +6,12 @@
   "engines": {
     "node": "24.x"
   },
+  "config": {
+    "mongodbMemoryServer": {
+      "version": "8.0.37",
+      "preferGlobalPath": true
+    }
+  },
   "scripts": {
     "dev:server": "tsx watch --env-file=.env server/src/index.ts",
     "dev:client": "vite client",
@@ -19,6 +25,8 @@
     "typecheck": "tsc -b client && tsc -p server --noEmit && tsc -p tsconfig.test.json --noEmit"
   },
   "dependencies": {
+    "mongodb": "~7.8.0",
+    "mongoose": "^9.12.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
@@ -31,6 +39,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "jsdom": "^31.0.1",
+    "mongodb-memory-server": "^11.3.0",
     "oxlint": "^1.90.0",
     "prettier": "3.10.1",
     "tailwindcss": "^4.3.5",

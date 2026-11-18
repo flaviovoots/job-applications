@@ -10,6 +10,7 @@ export default defineConfig({
           name: "server",
           environment: "node",
           include: ["server/test/**/*.test.ts", "shared/**/*.test.ts"],
+          globalSetup: ["./server/test/setup/globalSetup.ts"],
         },
       },
       {

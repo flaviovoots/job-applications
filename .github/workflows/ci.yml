@@ -15,6 +15,10 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-8.0.37
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm format
