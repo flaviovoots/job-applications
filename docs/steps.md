@@ -107,7 +107,11 @@ logger })` takes the logger as an input; three tests the design doesn't list
 added at 4.4); the error handler answers a 4xx error whose status is 404 with
 `"Not found"`; `index.html`'s title becomes the app's name; a `check` script
 that runs `lint`, `format`, `typecheck`, `test` and `build` in CI's order
-(added at 5.1); the closing docs commit stays on `dev` until Stage 2's merge.
+(added at 5.1); `server/test/tsconfig.json`, which only extends
+`tsconfig.test.json`, so VS Code (which finds only files named
+`tsconfig.json`) checks test files with the same settings and files as the
+CLI (added after 5.3); the closing docs commit stays on `dev` until Stage 2's
+merge.
 
 ### Start
 
@@ -249,10 +253,10 @@ Each step: write the test, watch it fail, then make it pass.
 ### Local check
 
 - [x] 5.1 Run `lint`, `format`, `typecheck`, `test` and `build` locally.
-- [ ] 5.2 Run `node --env-file=.env dist/server/src/index.js`, then check
+- [x] 5.2 Run `node --env-file=.env dist/server/src/index.js`, then check
       `http://localhost:3000` (placeholder page), `/healthz`, and that
       `/assets/nope.js` gives 404.
-- [ ] 5.3 Push `dev` and check that CI passes. The mongod cache misses on
+- [x] 5.3 Push `dev` and check that CI passes. The mongod cache misses on
       the first run and hits on the next.
 
 ### Deploy
