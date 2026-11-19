@@ -204,12 +204,12 @@ Each step: write the test, watch it fail, then make it pass.
       route that sets a cookie. A POST with `Cookie`, `Authorization` and a
       JSON body is logged with the cookie, authorization and `set-cookie`
       values redacted, and with no body.
-- [ ] Commit point: app pipeline.
-- [ ] 3.9 `server/test/health.test.ts`, then `server/src/http/health.ts`,
+- [x] Commit point: app pipeline.
+- [x] 3.9 `server/test/health.test.ts`, then `server/src/http/health.ts`,
       mounted in the app: 200 `{ status: "ok", db: "up", commit }` after
       `connectTestDb()`; 503 `{ status: "degraded", db: "down", commit }`
       after `disconnectTestDb()`.
-- [ ] 3.10 Replace `server/src/index.ts`: `readConfig(process.env)`,
+- [x] 3.10 Replace `server/src/index.ts`: `readConfig(process.env)`,
       `mongoose.set('bufferCommands', false)`, `await mongoose.connect()`,
       `createApp({ config, logger: createLogger() })`, `listen(port)`, and a
       startup log line with the commit. Any failure logs and exits with
@@ -217,7 +217,7 @@ Each step: write the test, watch it fail, then make it pass.
       `http://localhost:3000/healthz` shows `"db":"up"` and
       `"commit":"dev"`; `pnpm exec tsx server/src/index.ts` (no `.env`)
       exits with code 1 and names `MONGODB_URI`.
-- [ ] Commit point: health check and startup.
+- [x] Commit point: health check and startup.
 
 ### Client
 

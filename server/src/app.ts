@@ -2,6 +2,7 @@ import path from "node:path";
 import express, { type Express } from "express";
 import type { Logger } from "pino";
 import { pinoHttp } from "pino-http";
+import { healthCheck } from "./http/health.js";
 import type { Config } from "./config.js";
 import { apiNotFound, errorHandler } from "./http/errors.js";
 import { httpLoggerOptions } from "./http/logger.js";
@@ -17,6 +18,7 @@ export function createApp({ config, logger }: AppDeps): Express {
   app.set("trust proxy", 1);
   app.use(securityHeaders());
   app.use(pinoHttp(httpLoggerOptions(logger)));
+  app.get("/healthz", healthCheck(config.commit));
   app.use(["/api", "/auth"], apiNotFound);
   app.use(
     "/assets",
