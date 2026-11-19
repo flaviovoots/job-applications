@@ -7,4 +7,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   envDir: "..",
   envPrefix: ["VITE_", "GOOGLE_CLIENT_ID"],
+  server: {
+    proxy: {
+      "/api": "http://localhost:3000",
+      "/auth": "http://localhost:3000",
+    },
+  },
 });

@@ -102,8 +102,9 @@ S1.1 to S1.4 pass on production.
 
 Decided at the start of the stage (recorded in the decision log at 6.8):
 Render region Virginia with Atlas AWS `us-east-1`; `createApp({ config,
-logger })` takes the logger as an input; two tests the design doesn't list
-(`errors.test.ts`, `helpers.test.ts`); the error handler answers a 4xx error
+logger })` takes the logger as an input; three tests the design doesn't list
+(`errors.test.ts`, `helpers.test.ts`, and `client/src/test/setup.guard.test.ts`,
+added at 4.4); the error handler answers a 4xx error
 whose status is 404 with `"Not found"`; `index.html`'s title becomes the
 app's name; the closing docs commit stays on `dev` until Stage 2's merge.
 
@@ -221,26 +222,26 @@ Each step: write the test, watch it fail, then make it pass.
 
 ### Client
 
-- [ ] 4.1 `client/vite.config.ts`: `server.proxy` sends `/api` and `/auth`
+- [x] 4.1 `client/vite.config.ts`: `server.proxy` sends `/api` and `/auth`
       to `http://localhost:3000` (no `changeOrigin`, so the browser's
       `Origin` reaches the server).
-- [ ] 4.2 `pnpm add @tanstack/react-query react-router`.
-- [ ] 4.3 `client/src/queryClient.test.ts`, then `client/src/queryClient.ts`.
+- [x] 4.2 `pnpm add @tanstack/react-query react-router`.
+- [x] 4.3 `client/src/queryClient.test.ts`, then `client/src/queryClient.ts`.
       `shouldRetry(failureCount, error)`: TanStack Query's `failureCount`
-      starts at 0, so 0 gives true and 1 gives false; a 401, 403 or 404
-      gives false; an error without a numeric `status` counts as status 0.
+      starts at 0, so 0 gives true and 1 gives false; a 4xx (400 to 499) gives
+      false; an error without a numeric `status` counts as status 0.
       The exported `queryClient` uses it for queries and sets mutations'
       `retry` to false.
-- [ ] 4.4 `client/src/test/setup.ts`: before each test, set the shared
+- [x] 4.4 `client/src/test/setup.ts`: before each test, set the shared
       client's default query `retry` to false; after each test,
       `queryClient.clear()`.
-- [ ] 4.5 `client/src/components/ErrorBoundary.test.tsx`, then
+- [x] 4.5 `client/src/components/ErrorBoundary.test.tsx`, then
       `ErrorBoundary.tsx`: a child that throws shows "Something went wrong.
       Reload the page." The test silences `console.error` with a spy.
-- [ ] 4.6 `client/src/App.test.tsx`, then `App.tsx`: a heading "Job
+- [x] 4.6 `client/src/App.test.tsx`, then `App.tsx`: a heading "Job
       Applications Tracker". Change `index.html`'s `<title>` to the same
       name.
-- [ ] 4.7 `client/src/main.tsx`: `StrictMode` >
+- [x] 4.7 `client/src/main.tsx`: `StrictMode` >
       `QueryClientProvider` > `BrowserRouter` > `ErrorBoundary` > `App`.
 - [ ] Commit point: client shell.
 
