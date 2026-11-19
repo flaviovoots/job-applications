@@ -100,13 +100,14 @@ Goal: `https://jobs.<domain>/healthz` answers `{"status":"ok","db":"up"}`
 with the deployed commit, the placeholder page loads over HTTPS, and
 S1.1 to S1.4 pass on production.
 
-Decided at the start of the stage (recorded in the decision log at 6.8):
+Decided during the stage (recorded in the decision log at 6.8):
 Render region Virginia with Atlas AWS `us-east-1`; `createApp({ config,
 logger })` takes the logger as an input; three tests the design doesn't list
 (`errors.test.ts`, `helpers.test.ts`, and `client/src/test/setup.guard.test.ts`,
-added at 4.4); the error handler answers a 4xx error
-whose status is 404 with `"Not found"`; `index.html`'s title becomes the
-app's name; the closing docs commit stays on `dev` until Stage 2's merge.
+added at 4.4); the error handler answers a 4xx error whose status is 404 with
+`"Not found"`; `index.html`'s title becomes the app's name; a `check` script
+that runs `lint`, `format`, `typecheck`, `test` and `build` in CI's order
+(added at 5.1); the closing docs commit stays on `dev` until Stage 2's merge.
 
 ### Start
 
@@ -243,11 +244,11 @@ Each step: write the test, watch it fail, then make it pass.
       name.
 - [x] 4.7 `client/src/main.tsx`: `StrictMode` >
       `QueryClientProvider` > `BrowserRouter` > `ErrorBoundary` > `App`.
-- [ ] Commit point: client shell.
+- [x] Commit point: client shell.
 
 ### Local check
 
-- [ ] 5.1 Run `lint`, `format`, `typecheck`, `test` and `build` locally.
+- [x] 5.1 Run `lint`, `format`, `typecheck`, `test` and `build` locally.
 - [ ] 5.2 Run `node --env-file=.env dist/server/src/index.js`, then check
       `http://localhost:3000` (placeholder page), `/healthz`, and that
       `/assets/nope.js` gives 404.

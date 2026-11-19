@@ -22,7 +22,8 @@
     "lint": "oxlint",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
-    "typecheck": "tsc -b client && tsc -p server --noEmit && tsc -p tsconfig.test.json --noEmit"
+    "typecheck": "tsc -b client && tsc -p server --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "check": "pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.108.0",
