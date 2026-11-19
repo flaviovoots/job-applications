@@ -263,9 +263,9 @@ Each step: write the test, watch it fail, then make it pass.
 
 - [x] 6.1 Add S1.1 to S1.4 to `docs/acceptance-checklist.md` (desktop
       only).
-- [ ] Commit point: Stage 1 checklist lines.
-- [ ] 6.2 Merge `dev` into `main` and push.
-- [ ] 6.3 Create the Render web service from the GitHub repo: Free plan,
+- [x] Commit point: Stage 1 checklist lines.
+- [x] 6.2 Merge `dev` into `main` and push.
+- [x] 6.3 Create the Render web service from the GitHub repo: Free plan,
       Virginia, branch `main`; build
       `corepack enable && pnpm install --frozen-lockfile && pnpm build`;
       start `node dist/server/src/index.js`; health check path `/healthz`;
@@ -274,7 +274,7 @@ Each step: write the test, watch it fail, then make it pass.
       `corepack enable` fails, use `npm install -g pnpm@12.18.0` instead.
       Check that `https://<service>.onrender.com/healthz` shows `main`'s
       SHA.
-- [ ] 6.4 Confirm in Render's dashboard that the health check path is
+- [x] 6.4 Confirm in Render's dashboard that the health check path is
       active on a free instance.
 - [ ] 6.5 Domain steps 2 to 6 under "Build, deploy and domain" in the
       design: nameservers, add `jobs.<domain>` in Render, the CNAME (and
