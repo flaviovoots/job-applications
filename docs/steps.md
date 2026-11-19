@@ -261,7 +261,7 @@ Each step: write the test, watch it fail, then make it pass.
 
 ### Deploy
 
-- [ ] 6.1 Add S1.1 to S1.4 to `docs/acceptance-checklist.md` (desktop
+- [x] 6.1 Add S1.1 to S1.4 to `docs/acceptance-checklist.md` (desktop
       only).
 - [ ] Commit point: Stage 1 checklist lines.
 - [ ] 6.2 Merge `dev` into `main` and push.
