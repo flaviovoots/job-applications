@@ -15,9 +15,7 @@ export interface AppDeps {
 export function createApp({ config, logger }: AppDeps): Express {
   const app = express();
   app.set("trust proxy", 1);
-  app.set("trust proxy", 1);
   app.use(securityHeaders());
-  app.use(pinoHttp(httpLoggerOptions(logger)));
   app.use(pinoHttp(httpLoggerOptions(logger)));
   app.use(["/api", "/auth"], apiNotFound);
   app.use(
