@@ -276,12 +276,12 @@ Each step: write the test, watch it fail, then make it pass.
       SHA.
 - [x] 6.4 Confirm in Render's dashboard that the health check path is
       active on a free instance.
-- [ ] 6.5 Domain steps 2 to 6 under "Build, deploy and domain" in the
+- [x] 6.5 Domain steps 2 to 6 under "Build, deploy and domain" in the
       design: nameservers, add `jobs.<domain>` in Render, the CNAME (and
       no `AAAA`; `CAA` allowing `letsencrypt.org` and `pki.goog` if any
       exist), wait for the certificate, disable the `onrender.com`
       subdomain.
-- [ ] 6.6 Run S1.1 to S1.4 and add a run log row.
+- [x] 6.6 Run S1.1 to S1.4 and add a run log row.
 - [ ] 6.7 Leave the service idle for at least 20 minutes, then send the
       idle write (Stage 1, manual step 5 in the design) and note which of
       the three outcomes happened.

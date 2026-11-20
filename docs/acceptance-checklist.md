@@ -25,3 +25,4 @@ example `S1.1 pass, S1.2 fail`.
 
 | Date | Commit | Device and browser | Results | Notes |
 | --- | --- | --- | --- | --- |
+| 2026-11-19 | 111beb2 | Desktop (Windows 11), Brave | S1.1 pass, S1.2 pass, S1.3 pass, S1.4 pass | Stage 1 lines only. |
