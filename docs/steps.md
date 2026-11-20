@@ -289,4 +289,264 @@ Each step: write the test, watch it fail, then make it pass.
       check result (6.4), the idle outcome (6.7), and the changes listed at
       the top of this stage. Tick the steps;
       mongodb uses Mongoose's range (~7.8), so the app has one driver.
-- [ ] Commit point: Stage 1 results (stays on `dev` until Stage 2's merge).
+- [x] Commit point: Stage 1 results (stays on `dev` until Stage 2's merge).
+
+## Stage 2: Google sign-in end to end
+
+Goal: on `https://jobs.<domain>`, the author's account signs in with Google
+and out again, an account not on the list is refused with no cookie, a session
+survives a redeploy, and S2.1 to S2.4 pass on desktop, iPhone Safari and
+Android Chrome.
+
+Decided during the stage (recorded in the decision log at 6.5):
+`http://localhost:3000` is a fourth authorized JavaScript origin, so the built
+server's CSP and COOP are checked locally before deploying (5.3);
+`createApp({ config, logger, verifyIdToken })` keeps Stage 1's logger input;
+tests build the app with `makeTestApp()` after `connectTestDb()`, because the
+session store takes the connected client; tests the design doesn't list: an
+`app.test.ts` case where a POST with no `Origin` gets 403 (it proves the write
+guard is mounted), `SignedOutBanner.test.tsx`, and an `App.test.tsx` case for a
+failed `GET /api/me`; when `GET /api/me` fails with anything but a 401 and
+there is no session data yet, App shows "Couldn't reach the server." with a
+"Try again" button; `client/src/types/env.d.ts` types
+`import.meta.env.GOOGLE_CLIENT_ID`; a sign-in failure other than a 403 counts
+as `"failed"`; neither `auth.signin` nor `auth.refused` logs the email.
+
+### Start
+
+- [x] 0.1 Tick Stage 1's last commit point and write these steps.
+- [ ] Commit point: Stage 2 steps.
+
+### Google Cloud
+
+- [ ] 1.1 Create a Google Cloud project. In Google Auth Platform, set up the
+      consent screen: app name Job Applications Tracker, the author's support
+      and contact email, no logo; audience External; data access with only
+      the `openid` and `.../auth/userinfo.email` scopes. Publish it ("In
+      production"). With no sensitive scope and no logo, it needs no
+      verification.
+- [ ] 1.2 Create one OAuth client of type Web application, with the
+      authorized JavaScript origins `https://jobs.<domain>`,
+      `http://localhost:5173`, `http://localhost:3000` and `http://localhost`,
+      and no redirect URIs. Store the client id in the password manager.
+      Sign-in uses only the id; the client secret is never stored or used.
+- [ ] 1.3 Generate two `SESSION_SECRET` values with the command in
+      `.env.example`, one for development and one for production. Store both,
+      the client id and the allowlist (the author's account and the second
+      test account) in the password manager. Fill in `SESSION_SECRET` (the
+      development one), `GOOGLE_CLIENT_ID` and `ALLOWED_EMAILS` in this
+      computer's `.env`, and in the other computer's before working there.
+      S2.2 needs a third account, not on the list.
+- [ ] 1.4 Compare `securityHeaders()` with what Google Identity Services'
+      setup guide says about CSP, COOP and `Referrer-Policy` (helmet's
+      default `Referrer-Policy` is `no-referrer`). Note the result for 6.5. If
+      a header must change, change `app.test.ts` first, then `security.ts`,
+      and add the change to the list at the top of this stage.
+
+### Packages
+
+- [ ] 2.1 `pnpm add google-auth-library express-session connect-mongo` and
+      `pnpm add -D @types/express-session`. Approve or deny build scripts as
+      they come up. Check the majors against "Versions" in the design
+      (google-auth-library 11, express-session 1, connect-mongo 6), and that
+      `pnpm why mongodb` shows one version, so connect-mongo and Mongoose
+      share one driver.
+
+### Server
+
+Each step: write the test, watch it fail, then make it pass.
+
+- [ ] 3.1 `server/test/allowlist.test.ts`, then `server/src/auth/allowlist.ts`.
+      `parseAllowlist(raw)` splits on commas, trims, lowercases and drops
+      blanks: `" Alice@Example.com,, ,bob@example.com "` gives the two
+      lowercased emails. `isAllowed(set, email)` lowercases the email first.
+- [ ] 3.2 `config.test.ts`, then `config.ts`. `readConfig` adds
+      `sessionSecret`, `googleClientId`, `allowedEmails` (a `Set` from
+      `parseAllowlist`) and `appOrigin`. The Stage 1 cases start from a full
+      valid environment (`validEnv()` in the test), so only the variable under
+      test is missing or changed. New problems, in the same joined error and
+      without any value: `SESSION_SECRET is missing` or `SESSION_SECRET must
+      be at least 32 characters` (31 refused, 32 accepted);
+      `GOOGLE_CLIENT_ID is missing`; `ALLOWED_EMAILS is missing` (also when
+      parsing leaves no email); `APP_ORIGIN is missing` or `APP_ORIGIN must
+      be an origin, with no path or trailing slash` (the value must equal
+      `new URL(value).origin`). Add the four fields to `testConfig()`:
+      allowlist `alice@example.com` and `bob@example.com`, `appOrigin`
+      `http://localhost:5173`, and a 32-character secret.
+- [ ] Commit point: allowlist and config.
+- [ ] 3.3 `server/test/security.test.ts`, then `writeGuard(appOrigin)` in
+      `security.ts`, on a small Express app (pino-http, the guard, one route
+      answering 204, the error handler). The `Origin` check runs first: on any
+      method but GET and HEAD, a missing or foreign `Origin` gives 403
+      `{ error: "Forbidden", requestId }`. Then, on POST and PATCH, a body
+      that isn't `application/json` gives 415
+      `{ error: "Send JSON", requestId }`. The guard passes both on as an
+      `HttpError`. Cases: a form-encoded POST (415), a POST with a foreign
+      `Origin` (403), a POST and a DELETE with no `Origin` (403), and a GET
+      with no `Origin` (204).
+- [ ] 3.4 Type `server/src/auth/googleVerifier.ts` (no test: it calls
+      Google's servers). It exports `GoogleIdentity`
+      (`{ sub, email, emailVerified }`), the `VerifyIdToken` type, and
+      `makeGoogleVerifier(clientId)`, which calls
+      `OAuth2Client.verifyIdToken({ idToken, audience: clientId })` and maps
+      `email_verified` to `emailVerified`. Any failure, or a payload without
+      `sub` or `email`, throws `HttpError(401, "Invalid sign-in token")`.
+- [ ] 3.5 Refactor; the tests stay green. `createApp({ config, logger,
+      verifyIdToken })`, and `index.ts` passes
+      `makeGoogleVerifier(config.googleClientId)`. In `helpers.ts`, add
+      `fakeVerifier` (`"valid:<email>"` gives
+      `{ sub: "sub-<email>", email, emailVerified: true }`,
+      `"unverified:<email>"` the same with `emailVerified: false`, anything
+      else throws `HttpError(401, "Invalid sign-in token")`) and
+      `makeTestApp({ logger? })`, which returns `{ app, config }` built from
+      `testConfig()`, the fake verifier and a silent logger. `app.test.ts` and
+      `health.test.ts` build their app with it after `connectTestDb()`.
+- [ ] 3.6 `app.test.ts`: on `POST /auth/google` with the test `Origin`,
+      malformed JSON gives 400 and a body over 100 KB gives 413, both
+      `{ error: "Invalid request body", requestId }`; a JSON POST with no
+      `Origin` gives 403. This mounts `express.json()` and the write guard on
+      `/auth` and `/api` (pipeline step 5, without the session yet).
+- [ ] 3.7 `server/test/auth.test.ts`: an allowed sign-in
+      (`{ credential: "valid:alice@example.com" }`) gives 200 `{ email }` and
+      sets `sid` with `HttpOnly` and `SameSite=Lax`, and with `Secure` only
+      when `X-Forwarded-Proto: https` arrives; `readSession(agent)` shows
+      `userId: "sub-alice@example.com"` and the email. This brings in
+      `server/src/types/express.d.ts` (`SessionData`), `sessionMiddleware`
+      (`session.ts`, mounted between `express.json()` and the write guard),
+      and `authRouter`'s `POST /google` (`routes.ts`), which sets the
+      session's `userId` and `email` and saves it. Add to `helpers.ts`:
+      `signIn(agent, email)`, which sets the test `Origin` on the agent and
+      posts the credential, and `readSession(agent)`, which reads the stored
+      session for the agent's `sid` (the cookie value is
+      `s:<id>.<signature>`, URL-encoded; connect-mongo stores `session` as a
+      JSON string).
+- [ ] 3.8 `auth.test.ts`: a missing `credential` gives 400
+      `"Missing credential"`; a bad token gives 401 `"Invalid sign-in token"`;
+      `"unverified:alice@example.com"` and an unlisted account each give 403
+      `"Not allowed"`. Each refusal sends no `Set-Cookie` and leaves the
+      `sessions` collection empty.
+- [ ] 3.9 `auth.test.ts`: signing in again with the same agent gives a new
+      `sid` value. This brings in `req.session.regenerate()` before the
+      session's fields are set.
+- [ ] 3.10 `auth.test.ts`: after sign-in, `GET /api/me` gives `{ email }`;
+      with no session it gives 401 `"Not signed in"` and no `Set-Cookie`;
+      `POST /auth/logout` with `{}` gives 204 and clears `sid`, and the next
+      `GET /api/me` gives 401. `app.test.ts`: an anonymous
+      `GET /api/anything` now gives 401 (`requireAuth` comes before the JSON
+      404), a signed-in one gives the JSON 404, and `GET /auth/anything`
+      stays a JSON 404. This brings in `requireAuth` (`requireAuth.ts`),
+      `Request.user` in `express.d.ts`, `meRouter`, `POST /logout`, and
+      pipeline steps 6 to 8.
+- [ ] 3.11 `auth.test.ts`: after `config.allowedEmails.delete(...)`, the next
+      `GET /api/me` gives 401 and `readSession` finds no session. This brings
+      in `requireAuth(getAllowlist)`, with `() => config.allowedEmails` passed
+      by `createApp`; `POST /auth/google` reads the same getter.
+- [ ] 3.12 `auth.test.ts`, with `makeTestApp({ logger })` writing to a
+      capture stream (move `captureStream()` from `logger.test.ts` into
+      `helpers.ts`): a sign-in logs the message `auth.signin`; a refusal logs
+      `auth.refused` with `reason` `"email_unverified"` or `"not_allowed"`;
+      no log line contains the email.
+- [ ] Commit point: sign-in routes.
+- [ ] 3.13 Check by hand: `pnpm dev:server` starts with the new `.env`, and a
+      POST to `http://localhost:3000/auth/google` with
+      `Origin: http://localhost:5173` and `{"credential":"x"}` gives 401
+      `"Invalid sign-in token"` from the real verifier.
+
+### Client
+
+- [ ] 4.1 `client/index.html` loads `https://accounts.google.com/gsi/client`
+      with `async`. Type `client/src/types/gsi.d.ts`
+      (`window.google.accounts.id.initialize` and `renderButton`, and
+      `window.onGoogleLibraryLoad`) and `client/src/types/env.d.ts`
+      (`GOOGLE_CLIENT_ID: string` in `ImportMetaEnv`).
+- [ ] 4.2 `client/src/api.test.ts`, then `client/src/api.ts`:
+      `apiFetch<T>(path, { method, body })` and
+      `ApiError { status, error, fields, requestId }`. One case per rule: a
+      204 gives `undefined`; a JSON success is parsed; a JSON error throws
+      with the server's `error`, `fields` and `requestId`; an HTML answer and
+      a rejected fetch each throw status 0 with "Couldn't reach the server.
+      Try again."; a POST without a body sends `{}`. Tests mock `fetch` with
+      `vi.spyOn(globalThis, "fetch")`.
+- [ ] 4.3 `client/src/session.test.ts`, then `client/src/session.ts`: the
+      `['me']` query function maps a 401 from `GET /api/me` to `null`;
+      `useSession()` reads it. `apiFetch` calls `markSignedOut()` on a 401
+      from `/api/*`, which turns `{ email }` into
+      `{ email, signedOut: true }`; a 401 from `/auth/google` doesn't.
+- [ ] 4.4 `session.test.ts`: `signInWithCredential(credential)` posts to
+      `/auth/google`. A 200 sets `['me']` to `{ email }` and refetches the
+      other queries. A 403 stores `"refused"` under `['signInError']`, any
+      other failure stores `"failed"`, and `['me']` stays as it was; the next
+      attempt clears it. `useSignInError()` reads it.
+- [ ] 4.5 `session.test.ts`: `signOut()` posts `/auth/logout`, clears the
+      cache and sets `['me']` to `null`.
+- [ ] Commit point: client session.
+- [ ] 4.6 Type `client/src/test/render.tsx`: `renderWithProviders(ui,
+      { url = "/" })` renders inside `QueryClientProvider` with the shared
+      `queryClient` and a `MemoryRouter` at `url`. In `setup.ts`, stub
+      `window.google` (`initialize` and `renderButton` as `vi.fn()`) before
+      each test and remove it after.
+- [ ] 4.7 `client/src/components/GoogleButton.test.tsx`, then
+      `GoogleButton.tsx`. With the stub, it renders the button
+      (`renderButton` gets its element); without it, it renders once
+      `window.onGoogleLibraryLoad` fires; two mounts call `initialize` once
+      and `renderButton` twice. `initialize` gets `client_id` from
+      `import.meta.env.GOOGLE_CLIENT_ID` (set in the test with
+      `vi.stubEnv`), `ux_mode: "popup"`, and a callback that calls
+      `signInWithCredential`. The once-per-page-load flag is module state,
+      so each case imports a fresh copy (`vi.resetModules()`, then
+      `await import()`).
+- [ ] 4.8 `client/src/pages/SignInPage.test.tsx`, then `SignInPage.tsx`: the
+      app's name as the `<h1>`, the Google button, and the message from
+      `['signInError']`: "This Google account is not allowed to use this
+      app." after a 403 from `POST /auth/google`, "Sign-in failed. Try
+      again." after a 401. The tests call `signInWithCredential()` with
+      `fetch` mocked. The message is a `SignInError` component exported from
+      `SignInPage.tsx`, so the banner shows the same text.
+- [ ] 4.9 `client/src/components/SignedOutBanner.test.tsx`, then
+      `SignedOutBanner.tsx`: "Signed out: sign in again" with the Google
+      button; after a 403 from `POST /auth/google`, the refusal message shows
+      inside the banner and the banner stays.
+- [ ] 4.10 `App.test.tsx`, then `App.tsx`, rendered with
+      `renderWithProviders`: a 401 on `GET /api/me` shows the sign-in page; a
+      200 shows the email and a "Sign out" button in a header above the
+      placeholder heading; a rejected fetch shows "Couldn't reach the
+      server." and a "Try again" button, which refetches `['me']` (a 200 then
+      shows the email). While `['me']` loads, App shows nothing. When
+      `['me']` is signed out mid-session, the banner shows above the page.
+- [ ] Commit point: client sign-in.
+
+### Local check
+
+- [ ] 5.1 Run `pnpm check`.
+- [ ] 5.2 Run `pnpm dev:server` and `pnpm dev:client`. At
+      `http://localhost:5173`: sign in with the author's account (the header
+      shows the email; DevTools shows `sid` with `HttpOnly` and `Lax`, without
+      `Secure`); restart `dev:server` and reload (still signed in: the session
+      is in `jobs_dev`); Sign out (the sign-in page); sign in with the third
+      account (the refusal message, and no `sid`).
+- [ ] 5.3 Run `pnpm build`, then the built server with `APP_ORIGIN` set to
+      `http://localhost:3000` in the shell, which wins over `.env`
+      (PowerShell: `$env:APP_ORIGIN = "http://localhost:3000"`, then
+      `node --env-file=.env dist/server/src/index.js`). At
+      `http://localhost:3000`, sign in and out: no CSP error in the console,
+      and Google's popup closes after the account is picked.
+- [ ] 5.4 Push `dev` and check that CI passes.
+
+### Deploy
+
+- [ ] 6.1 Add S2.1 to S2.4 to `docs/acceptance-checklist.md` (desktop,
+      iPhone Safari and Android Chrome).
+- [ ] Commit point: Stage 2 checklist lines.
+- [ ] 6.2 In Render's environment, add `SESSION_SECRET` (the production one),
+      `GOOGLE_CLIENT_ID`, `ALLOWED_EMAILS` and
+      `APP_ORIGIN=https://jobs.<domain>`, with "Save only": the merge
+      deploys. The build reads `GOOGLE_CLIENT_ID` too, so it must be set
+      before 6.3.
+- [ ] 6.3 Merge `dev` into `main` and push. Check that `/healthz` shows
+      `main`'s SHA.
+- [ ] 6.4 Run S2.1 to S2.4 on each device, and add one run log row per device
+      and browser.
+- [ ] 6.5 Add a decision log entry: the setup guide check (1.4), anything
+      Google's console or the phones did differently from the design, and the
+      changes listed at the top of this stage. Tick the steps.
+- [ ] Commit point: Stage 2 results (stays on `dev` until Stage 3's merge).
