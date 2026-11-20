@@ -299,8 +299,11 @@ survives a redeploy, and S2.1 to S2.4 pass on desktop, iPhone Safari and
 Android Chrome.
 
 Decided during the stage (recorded in the decision log at 6.5):
-`http://localhost:3000` is a fourth authorized JavaScript origin, so the built
-server's CSP and COOP are checked locally before deploying (5.3);
+Google publishes an External consent screen only with a homepage and a
+privacy policy URL, so the privacy policy is a static page on the root domain,
+hosted through cPanel outside the repository (1.1); `http://localhost:3000`
+is a fourth authorized JavaScript origin, so the built server's CSP and COOP
+are checked locally before deploying (5.3);
 `createApp({ config, logger, verifyIdToken })` keeps Stage 1's logger input;
 tests build the app with `makeTestApp()` after `connectTestDb()`, because the
 session store takes the connected client; tests the design doesn't list: an
@@ -315,17 +318,20 @@ as `"failed"`; neither `auth.signin` nor `auth.refused` logs the email.
 ### Start
 
 - [x] 0.1 Tick Stage 1's last commit point and write these steps.
-- [ ] Commit point: Stage 2 steps.
+- [x] Commit point: Stage 2 steps.
 
 ### Google Cloud
 
-- [ ] 1.1 Create a Google Cloud project. In Google Auth Platform, set up the
+- [x] 1.1 Create a Google Cloud project. In Google Auth Platform, set up the
       consent screen: app name Job Applications Tracker, the author's support
       and contact email, no logo; audience External; data access with only
-      the `openid` and `.../auth/userinfo.email` scopes. Publish it ("In
-      production"). With no sensitive scope and no logo, it needs no
-      verification.
-- [ ] 1.2 Create one OAuth client of type Web application, with the
+      the `openid` and `.../auth/userinfo.email` scopes. Publishing ("In
+      production") also needs a homepage and a privacy policy URL: the
+      homepage is `https://jobs.<domain>`, and the privacy policy is a static
+      `privacy.html` uploaded to the root domain through cPanel, outside the
+      repository. Add the root domain under Authorized domains, then publish.
+      With no sensitive scope and no logo, it needs no verification.
+- [x] 1.2 Create one OAuth client of type Web application, with the
       authorized JavaScript origins `https://jobs.<domain>`,
       `http://localhost:5173`, `http://localhost:3000` and `http://localhost`,
       and no redirect URIs. Store the client id in the password manager.
