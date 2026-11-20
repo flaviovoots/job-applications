@@ -282,10 +282,10 @@ Each step: write the test, watch it fail, then make it pass.
       exist), wait for the certificate, disable the `onrender.com`
       subdomain.
 - [x] 6.6 Run S1.1 to S1.4 and add a run log row.
-- [ ] 6.7 Leave the service idle for at least 20 minutes, then send the
+- [x] 6.7 Leave the service idle for at least 20 minutes, then send the
       idle write (Stage 1, manual step 5 in the design) and note which of
-      the three outcomes happened.
-- [ ] 6.8 Add a decision log entry: region, Atlas version, the health
+      the three outcomes happened → the app's JSON 404, after a delay.
+- [x] 6.8 Add a decision log entry: region, Atlas version, the health
       check result (6.4), the idle outcome (6.7), and the changes listed at
       the top of this stage. Tick the steps;
       mongodb uses Mongoose's range (~7.8), so the app has one driver.
