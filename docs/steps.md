@@ -318,7 +318,11 @@ the CSP and COOP match Google Identity Services' setup guide (its parent
 path `https://accounts.google.com/gsi/` covers `client`, `style` and FedCM's
 `fedcm.json`), but `Referrer-Policy` is `strict-origin-when-cross-origin`, as
 the guide recommends, not helmet's `no-referrer`, which hides the page's
-origin from Google's button (1.4).
+origin from Google's button (1.4); `pnpm why mongodb` shows a second
+driver, 7.5.0, used only by `mongodb-memory-server-core` (dev), while
+connect-mongo, Mongoose and the app share 7.8.0 (2.1); from 3.1 on, Claude
+writes the files the design marks "Typed", test first, and the author reviews
+each diff before its commit point.
 
 ### Start
 
@@ -356,7 +360,7 @@ origin from Google's button (1.4).
 
 ### Packages
 
-- [ ] 2.1 `pnpm add google-auth-library express-session connect-mongo` and
+- [x] 2.1 `pnpm add google-auth-library express-session connect-mongo` and
       `pnpm add -D @types/express-session`. Approve or deny build scripts as
       they come up. Check the majors against "Versions" in the design
       (google-auth-library 11, express-session 1, connect-mongo 6), and that
@@ -367,11 +371,11 @@ origin from Google's button (1.4).
 
 Each step: write the test, watch it fail, then make it pass.
 
-- [ ] 3.1 `server/test/allowlist.test.ts`, then `server/src/auth/allowlist.ts`.
+- [x] 3.1 `server/test/allowlist.test.ts`, then `server/src/auth/allowlist.ts`.
       `parseAllowlist(raw)` splits on commas, trims, lowercases and drops
       blanks: `" Alice@Example.com,, ,bob@example.com "` gives the two
       lowercased emails. `isAllowed(set, email)` lowercases the email first.
-- [ ] 3.2 `config.test.ts`, then `config.ts`. `readConfig` adds
+- [x] 3.2 `config.test.ts`, then `config.ts`. `readConfig` adds
       `sessionSecret`, `googleClientId`, `allowedEmails` (a `Set` from
       `parseAllowlist`) and `appOrigin`. The Stage 1 cases start from a full
       valid environment (`validEnv()` in the test), so only the variable under

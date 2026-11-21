@@ -41,5 +41,9 @@ export function testConfig(): Config {
     port: 0,
     commit: "test-commit",
     clientDir: fileURLToPath(new URL("./fixtures/client", import.meta.url)),
+    sessionSecret: "s".repeat(32),
+    googleClientId: "test-client.apps.googleusercontent.com",
+    allowedEmails: new Set(["alice@example.com", "bob@example.com"]),
+    appOrigin: "http://localhost:5173",
   };
 }
