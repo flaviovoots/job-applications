@@ -313,7 +313,12 @@ failed `GET /api/me`; when `GET /api/me` fails with anything but a 401 and
 there is no session data yet, App shows "Couldn't reach the server." with a
 "Try again" button; `client/src/types/env.d.ts` types
 `import.meta.env.GOOGLE_CLIENT_ID`; a sign-in failure other than a 403 counts
-as `"failed"`; neither `auth.signin` nor `auth.refused` logs the email.
+as `"failed"`; neither `auth.signin` nor `auth.refused` logs the email;
+the CSP and COOP match Google Identity Services' setup guide (its parent
+path `https://accounts.google.com/gsi/` covers `client`, `style` and FedCM's
+`fedcm.json`), but `Referrer-Policy` is `strict-origin-when-cross-origin`, as
+the guide recommends, not helmet's `no-referrer`, which hides the page's
+origin from Google's button (1.4).
 
 ### Start
 
@@ -336,14 +341,14 @@ as `"failed"`; neither `auth.signin` nor `auth.refused` logs the email.
       `http://localhost:5173`, `http://localhost:3000` and `http://localhost`,
       and no redirect URIs. Store the client id in the password manager.
       Sign-in uses only the id; the client secret is never stored or used.
-- [ ] 1.3 Generate two `SESSION_SECRET` values with the command in
+- [x] 1.3 Generate two `SESSION_SECRET` values with the command in
       `.env.example`, one for development and one for production. Store both,
       the client id and the allowlist (the author's account and the second
       test account) in the password manager. Fill in `SESSION_SECRET` (the
       development one), `GOOGLE_CLIENT_ID` and `ALLOWED_EMAILS` in this
       computer's `.env`, and in the other computer's before working there.
       S2.2 needs a third account, not on the list.
-- [ ] 1.4 Compare `securityHeaders()` with what Google Identity Services'
+- [x] 1.4 Compare `securityHeaders()` with what Google Identity Services'
       setup guide says about CSP, COOP and `Referrer-Policy` (helmet's
       default `Referrer-Policy` is `no-referrer`). Note the result for 6.5. If
       a header must change, change `app.test.ts` first, then `security.ts`,

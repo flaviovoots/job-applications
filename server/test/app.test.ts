@@ -66,7 +66,7 @@ describe("createApp", () => {
     },
   );
 
-  it("sends the CSP and COOP that Google sign-in needs", async () => {
+  it("sends the CSP, COOP and Referrer-Policy that Google sign-in needs", async () => {
     const res = await request(app).get("/");
 
     const csp = res.headers["content-security-policy"];
@@ -83,6 +83,9 @@ describe("createApp", () => {
     expect(csp).toContain("frame-ancestors 'none'");
     expect(res.headers["cross-origin-opener-policy"]).toBe(
       "same-origin-allow-popups",
+    );
+    expect(res.headers["referrer-policy"]).toBe(
+      "strict-origin-when-cross-origin",
     );
     expect(res.headers["x-request-id"]).toMatch(requestIdPattern);
   });

@@ -15,5 +15,7 @@ export function securityHeaders(): ReturnType<typeof helmet> {
       },
     },
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    // Google's button checks the page's origin, which no-referrer hides.
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   });
 }
