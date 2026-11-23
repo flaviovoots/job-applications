@@ -421,7 +421,7 @@ Each step: write the test, watch it fail, then make it pass.
       `{ error: "Invalid request body", requestId }`; a JSON POST with no
       `Origin` gives 403. This mounts `express.json()` and the write guard on
       `/auth` and `/api` (pipeline step 5, without the session yet).
-- [ ] 3.7 `server/test/auth.test.ts`: an allowed sign-in
+- [x] 3.7 `server/test/auth.test.ts`: an allowed sign-in
       (`{ credential: "valid:alice@example.com" }`) gives 200 `{ email }` and
       sets `sid` with `HttpOnly` and `SameSite=Lax`, and with `Secure` only
       when `X-Forwarded-Proto: https` arrives; `readSession(agent)` shows
@@ -435,15 +435,15 @@ Each step: write the test, watch it fail, then make it pass.
       session for the agent's `sid` (the cookie value is
       `s:<id>.<signature>`, URL-encoded; connect-mongo stores `session` as a
       JSON string).
-- [ ] 3.8 `auth.test.ts`: a missing `credential` gives 400
+- [x] 3.8 `auth.test.ts`: a missing `credential` gives 400
       `"Missing credential"`; a bad token gives 401 `"Invalid sign-in token"`;
       `"unverified:alice@example.com"` and an unlisted account each give 403
       `"Not allowed"`. Each refusal sends no `Set-Cookie` and leaves the
       `sessions` collection empty.
-- [ ] 3.9 `auth.test.ts`: signing in again with the same agent gives a new
+- [x] 3.9 `auth.test.ts`: signing in again with the same agent gives a new
       `sid` value. This brings in `req.session.regenerate()` before the
       session's fields are set.
-- [ ] 3.10 `auth.test.ts`: after sign-in, `GET /api/me` gives `{ email }`;
+- [x] 3.10 `auth.test.ts`: after sign-in, `GET /api/me` gives `{ email }`;
       with no session it gives 401 `"Not signed in"` and no `Set-Cookie`;
       `POST /auth/logout` with `{}` gives 204 and clears `sid`, and the next
       `GET /api/me` gives 401. `app.test.ts`: an anonymous
@@ -452,11 +452,11 @@ Each step: write the test, watch it fail, then make it pass.
       stays a JSON 404. This brings in `requireAuth` (`requireAuth.ts`),
       `Request.user` in `express.d.ts`, `meRouter`, `POST /logout`, and
       pipeline steps 6 to 8.
-- [ ] 3.11 `auth.test.ts`: after `config.allowedEmails.delete(...)`, the next
+- [x] 3.11 `auth.test.ts`: after `config.allowedEmails.delete(...)`, the next
       `GET /api/me` gives 401 and `readSession` finds no session. This brings
       in `requireAuth(getAllowlist)`, with `() => config.allowedEmails` passed
       by `createApp`; `POST /auth/google` reads the same getter.
-- [ ] 3.12 `auth.test.ts`, with `makeTestApp({ logger })` writing to a
+- [x] 3.12 `auth.test.ts`, with `makeTestApp({ logger })` writing to a
       capture stream (move `captureStream()` from `logger.test.ts` into
       `helpers.ts`): a sign-in logs the message `auth.signin`; a refusal logs
       `auth.refused` with `reason` `"email_unverified"` or `"not_allowed"`;

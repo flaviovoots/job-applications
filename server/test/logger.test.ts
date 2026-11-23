@@ -1,20 +1,9 @@
-import { Writable } from "node:stream";
 import express from "express";
 import { pinoHttp } from "pino-http";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createLogger, httpLoggerOptions } from "../src/http/logger.js";
-
-function captureStream() {
-  const lines: string[] = [];
-  const stream = new Writable({
-    write(chunk, _encoding, callback) {
-      lines.push(String(chunk));
-      callback();
-    },
-  });
-  return { lines, stream };
-}
+import { captureStream } from "./helpers.js";
 
 describe("request logging", () => {
   it("redacts cookie, authorization and set-cookie, and never logs the body", async () => {

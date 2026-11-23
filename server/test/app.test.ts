@@ -1,7 +1,12 @@
 import request from "supertest";
 import type { Express } from "express";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { connectTestDb, disconnectTestDb, makeTestApp } from "./helpers.js";
+import {
+  connectTestDb,
+  disconnectTestDb,
+  makeTestApp,
+  signIn,
+} from "./helpers.js";
 
 let app: Express;
 
@@ -15,21 +20,42 @@ afterAll(disconnectTestDb);
 const requestIdPattern = /^[0-9a-f-]{36}$/;
 
 describe("createApp", () => {
-  it.each(["/api/anything", "/auth/anything"])(
-    "GET %s gives a JSON 404 with a requestId",
-    async (path) => {
-      const res = await request(app).get(path);
+  it("GET /auth/anything gives a JSON 404 with a requestId", async () => {
+    const res = await request(app).get("/auth/anything");
 
-      expect(res.status).toBe(404);
-      expect(res.type).toBe("application/json");
-      expect(res.body).toEqual({
-        error: "Not found",
-        requestId: expect.any(String),
-      });
-    },
-  );
-  it("sets X-Request-Id to the 404's requestId", async () => {
+    expect(res.status).toBe(404);
+    expect(res.type).toBe("application/json");
+    expect(res.body).toEqual({
+      error: "Not found",
+      requestId: expect.any(String),
+    });
+  });
+
+  it("answers an anonymous GET /api/anything with 401, before the 404", async () => {
     const res = await request(app).get("/api/anything");
+
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({
+      error: "Not signed in",
+      requestId: expect.stringMatching(requestIdPattern),
+    });
+  });
+
+  it("answers a signed-in GET /api/anything with the JSON 404", async () => {
+    const agent = request.agent(app);
+    await signIn(agent, "alice@example.com");
+
+    const res = await agent.get("/api/anything");
+
+    expect(res.status).toBe(404);
+    expect(res.body).toEqual({
+      error: "Not found",
+      requestId: expect.stringMatching(requestIdPattern),
+    });
+  });
+
+  it("sets X-Request-Id to the 404's requestId", async () => {
+    const res = await request(app).get("/auth/anything");
 
     expect(res.headers["x-request-id"]).toMatch(requestIdPattern);
     expect(res.headers["x-request-id"]).toBe(res.body.requestId);

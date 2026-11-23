@@ -1,5 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { Writable } from "node:stream";
+import type { SessionData } from "express-session";
 import mongoose from "mongoose";
+import type request from "supertest";
 import { inject } from "vitest";
 import { fileURLToPath } from "node:url";
 import type { Logger } from "pino";
@@ -72,4 +75,46 @@ export function makeTestApp({ logger }: { logger?: Logger } = {}) {
     verifyIdToken: fakeVerifier,
   });
   return { app, config };
+}
+
+// A log destination that keeps each line, for createLogger({ destination }).
+export function captureStream() {
+  const lines: string[] = [];
+  const stream = new Writable({
+    write(chunk, _encoding, callback) {
+      lines.push(String(chunk));
+      callback();
+    },
+  });
+  return { lines, stream };
+}
+
+// Makes the agent send the test Origin on every later request, then signs in.
+export function signIn(agent: request.Agent, email: string) {
+  agent.set("Origin", testConfig().appOrigin);
+  return agent.post("/auth/google").send({ credential: `valid:${email}` });
+}
+
+// The sid cookie holds "s:<id>.<signature>", URL-encoded, and connect-mongo
+// stores the session as a JSON string.
+export async function readSession(
+  agent: request.Agent,
+): Promise<SessionData | null> {
+  const cookie = agent.jar.getCookie("sid", {
+    domain: "127.0.0.1",
+    path: "/",
+    secure: true,
+    script: false,
+  });
+  if (!cookie) {
+    return null;
+  }
+  const value = decodeURIComponent(cookie.value);
+  const id = value.slice("s:".length, value.lastIndexOf("."));
+  const stored = await mongoose.connection
+    .getClient()
+    .db()
+    .collection<{ _id: string; session: string }>("sessions")
+    .findOne({ _id: id });
+  return stored ? JSON.parse(stored.session) : null;
 }
