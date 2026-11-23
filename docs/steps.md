@@ -322,7 +322,13 @@ origin from Google's button (1.4); `pnpm why mongodb` shows a second
 driver, 7.5.0, used only by `mongodb-memory-server-core` (dev), while
 connect-mongo, Mongoose and the app share 7.8.0 (2.1); from 3.1 on, Claude
 writes the files the design marks "Typed", test first, and the author reviews
-each diff before its commit point.
+each diff before its commit point; when a refetch of `['me']` gets a 401
+after sign-in, the query function returns what `markSignedOut()` left, so a
+session that ends shows the banner, not the sign-in page (4.3); `signOut()`
+sets `['me']` to `null` and removes every other query, because `clear()`
+would also remove `['me']` and leave the mounted hooks showing the email; a
+failed `POST /auth/logout` makes `signOut()` throw and change nothing, since
+the cookie may still be valid (4.5).
 
 ### Start
 
@@ -461,20 +467,20 @@ Each step: write the test, watch it fail, then make it pass.
       `helpers.ts`): a sign-in logs the message `auth.signin`; a refusal logs
       `auth.refused` with `reason` `"email_unverified"` or `"not_allowed"`;
       no log line contains the email.
-- [ ] Commit point: sign-in routes.
-- [ ] 3.13 Check by hand: `pnpm dev:server` starts with the new `.env`, and a
+- [x] Commit point: sign-in routes.
+- [x] 3.13 Check by hand: `pnpm dev:server` starts with the new `.env`, and a
       POST to `http://localhost:3000/auth/google` with
       `Origin: http://localhost:5173` and `{"credential":"x"}` gives 401
       `"Invalid sign-in token"` from the real verifier.
 
 ### Client
 
-- [ ] 4.1 `client/index.html` loads `https://accounts.google.com/gsi/client`
+- [x] 4.1 `client/index.html` loads `https://accounts.google.com/gsi/client`
       with `async`. Type `client/src/types/gsi.d.ts`
       (`window.google.accounts.id.initialize` and `renderButton`, and
       `window.onGoogleLibraryLoad`) and `client/src/types/env.d.ts`
       (`GOOGLE_CLIENT_ID: string` in `ImportMetaEnv`).
-- [ ] 4.2 `client/src/api.test.ts`, then `client/src/api.ts`:
+- [x] 4.2 `client/src/api.test.ts`, then `client/src/api.ts`:
       `apiFetch<T>(path, { method, body })` and
       `ApiError { status, error, fields, requestId }`. One case per rule: a
       204 gives `undefined`; a JSON success is parsed; a JSON error throws
@@ -482,17 +488,17 @@ Each step: write the test, watch it fail, then make it pass.
       a rejected fetch each throw status 0 with "Couldn't reach the server.
       Try again."; a POST without a body sends `{}`. Tests mock `fetch` with
       `vi.spyOn(globalThis, "fetch")`.
-- [ ] 4.3 `client/src/session.test.ts`, then `client/src/session.ts`: the
+- [x] 4.3 `client/src/session.test.ts`, then `client/src/session.ts`: the
       `['me']` query function maps a 401 from `GET /api/me` to `null`;
       `useSession()` reads it. `apiFetch` calls `markSignedOut()` on a 401
       from `/api/*`, which turns `{ email }` into
       `{ email, signedOut: true }`; a 401 from `/auth/google` doesn't.
-- [ ] 4.4 `session.test.ts`: `signInWithCredential(credential)` posts to
+- [x] 4.4 `session.test.ts`: `signInWithCredential(credential)` posts to
       `/auth/google`. A 200 sets `['me']` to `{ email }` and refetches the
       other queries. A 403 stores `"refused"` under `['signInError']`, any
       other failure stores `"failed"`, and `['me']` stays as it was; the next
       attempt clears it. `useSignInError()` reads it.
-- [ ] 4.5 `session.test.ts`: `signOut()` posts `/auth/logout`, clears the
+- [x] 4.5 `session.test.ts`: `signOut()` posts `/auth/logout`, clears the
       cache and sets `['me']` to `null`.
 - [ ] Commit point: client session.
 - [ ] 4.6 Type `client/src/test/render.tsx`: `renderWithProviders(ui,
