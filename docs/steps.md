@@ -500,13 +500,13 @@ Each step: write the test, watch it fail, then make it pass.
       attempt clears it. `useSignInError()` reads it.
 - [x] 4.5 `session.test.ts`: `signOut()` posts `/auth/logout`, clears the
       cache and sets `['me']` to `null`.
-- [ ] Commit point: client session.
-- [ ] 4.6 Type `client/src/test/render.tsx`: `renderWithProviders(ui,
+- [x] Commit point: client session.
+- [x] 4.6 Type `client/src/test/render.tsx`: `renderWithProviders(ui,
       { url = "/" })` renders inside `QueryClientProvider` with the shared
       `queryClient` and a `MemoryRouter` at `url`. In `setup.ts`, stub
       `window.google` (`initialize` and `renderButton` as `vi.fn()`) before
       each test and remove it after.
-- [ ] 4.7 `client/src/components/GoogleButton.test.tsx`, then
+- [x] 4.7 `client/src/components/GoogleButton.test.tsx`, then
       `GoogleButton.tsx`. With the stub, it renders the button
       (`renderButton` gets its element); without it, it renders once
       `window.onGoogleLibraryLoad` fires; two mounts call `initialize` once
@@ -516,18 +516,18 @@ Each step: write the test, watch it fail, then make it pass.
       `signInWithCredential`. The once-per-page-load flag is module state,
       so each case imports a fresh copy (`vi.resetModules()`, then
       `await import()`).
-- [ ] 4.8 `client/src/pages/SignInPage.test.tsx`, then `SignInPage.tsx`: the
+- [x] 4.8 `client/src/pages/SignInPage.test.tsx`, then `SignInPage.tsx`: the
       app's name as the `<h1>`, the Google button, and the message from
       `['signInError']`: "This Google account is not allowed to use this
       app." after a 403 from `POST /auth/google`, "Sign-in failed. Try
       again." after a 401. The tests call `signInWithCredential()` with
       `fetch` mocked. The message is a `SignInError` component exported from
       `SignInPage.tsx`, so the banner shows the same text.
-- [ ] 4.9 `client/src/components/SignedOutBanner.test.tsx`, then
+- [x] 4.9 `client/src/components/SignedOutBanner.test.tsx`, then
       `SignedOutBanner.tsx`: "Signed out: sign in again" with the Google
       button; after a 403 from `POST /auth/google`, the refusal message shows
       inside the banner and the banner stays.
-- [ ] 4.10 `App.test.tsx`, then `App.tsx`, rendered with
+- [x] 4.10 `App.test.tsx`, then `App.tsx`, rendered with
       `renderWithProviders`: a 401 on `GET /api/me` shows the sign-in page; a
       200 shows the email and a "Sign out" button in a header above the
       placeholder heading; a rejected fetch shows "Couldn't reach the

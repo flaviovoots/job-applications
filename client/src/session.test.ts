@@ -12,19 +12,9 @@ import {
   useSession,
   useSignInError,
 } from "./session";
+import { jsonResponse, notSignedIn } from "./test/responses";
 
 const email = "alice@example.com";
-
-function jsonResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
-  });
-}
-
-function notSignedIn(): Response {
-  return jsonResponse(401, { error: "Not signed in", requestId: "req-1" });
-}
 
 function wrapper({ children }: { children: ReactNode }) {
   return createElement(QueryClientProvider, { client: queryClient }, children);

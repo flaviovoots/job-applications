@@ -1,14 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError, apiFetch } from "./api";
+import { jsonResponse } from "./test/responses";
 
 const UNREACHABLE = "Couldn't reach the server. Try again.";
-
-function jsonResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
-  });
-}
 
 function mockFetch(response: Response) {
   return vi.spyOn(globalThis, "fetch").mockResolvedValue(response);
