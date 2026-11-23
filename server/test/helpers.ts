@@ -2,7 +2,12 @@ import { randomUUID } from "node:crypto";
 import mongoose from "mongoose";
 import { inject } from "vitest";
 import { fileURLToPath } from "node:url";
+import type { Logger } from "pino";
+import { createApp } from "../src/app.js";
+import type { VerifyIdToken } from "../src/auth/googleVerifier.js";
 import type { Config } from "../src/config.js";
+import { HttpError } from "../src/http/errors.js";
+import { createLogger } from "../src/http/logger.js";
 
 export function assertTestUri(uri: string): void {
   let host = "";
@@ -46,4 +51,25 @@ export function testConfig(): Config {
     allowedEmails: new Set(["alice@example.com", "bob@example.com"]),
     appOrigin: "http://localhost:5173",
   };
+}
+
+// "valid:<email>" and "unverified:<email>" stand in for Google ID tokens.
+export const fakeVerifier: VerifyIdToken = async (idToken) => {
+  const match = /^(valid|unverified):(.+)$/.exec(idToken);
+  if (!match) {
+    throw new HttpError(401, "Invalid sign-in token");
+  }
+  const [, kind, email] = match;
+  return { sub: `sub-${email}`, email, emailVerified: kind === "valid" };
+};
+
+// Call after connectTestDb(): the session store uses the connected client.
+export function makeTestApp({ logger }: { logger?: Logger } = {}) {
+  const config = testConfig();
+  const app = createApp({
+    config,
+    logger: logger ?? createLogger({ level: "silent" }),
+    verifyIdToken: fakeVerifier,
+  });
+  return { app, config };
 }

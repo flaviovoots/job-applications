@@ -1,13 +1,6 @@
 import request from "supertest";
 import { describe, expect, it, onTestFinished } from "vitest";
-import { createApp } from "../src/app.js";
-import { createLogger } from "../src/http/logger.js";
-import { connectTestDb, disconnectTestDb, testConfig } from "./helpers.js";
-
-const app = createApp({
-  config: testConfig(),
-  logger: createLogger({ level: "silent" }),
-});
+import { connectTestDb, disconnectTestDb, makeTestApp } from "./helpers.js";
 
 const requestIdPattern = /^[0-9a-f-]{36}$/;
 
@@ -15,6 +8,7 @@ describe("GET /healthz", () => {
   it("gives 200 with db up while connected", async () => {
     await connectTestDb();
     onTestFinished(disconnectTestDb);
+    const { app } = makeTestApp();
 
     const res = await request(app).get("/healthz");
 
@@ -25,6 +19,7 @@ describe("GET /healthz", () => {
 
   it("gives 503 degraded after disconnecting", async () => {
     await connectTestDb();
+    const { app } = makeTestApp();
     await disconnectTestDb();
 
     const res = await request(app).get("/healthz");

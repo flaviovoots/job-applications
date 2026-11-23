@@ -388,8 +388,8 @@ Each step: write the test, watch it fail, then make it pass.
       `new URL(value).origin`). Add the four fields to `testConfig()`:
       allowlist `alice@example.com` and `bob@example.com`, `appOrigin`
       `http://localhost:5173`, and a 32-character secret.
-- [ ] Commit point: allowlist and config.
-- [ ] 3.3 `server/test/security.test.ts`, then `writeGuard(appOrigin)` in
+- [x] Commit point: allowlist and config.
+- [x] 3.3 `server/test/security.test.ts`, then `writeGuard(appOrigin)` in
       `security.ts`, on a small Express app (pino-http, the guard, one route
       answering 204, the error handler). The `Origin` check runs first: on any
       method but GET and HEAD, a missing or foreign `Origin` gives 403
@@ -399,14 +399,14 @@ Each step: write the test, watch it fail, then make it pass.
       `HttpError`. Cases: a form-encoded POST (415), a POST with a foreign
       `Origin` (403), a POST and a DELETE with no `Origin` (403), and a GET
       with no `Origin` (204).
-- [ ] 3.4 Type `server/src/auth/googleVerifier.ts` (no test: it calls
+- [x] 3.4 Type `server/src/auth/googleVerifier.ts` (no test: it calls
       Google's servers). It exports `GoogleIdentity`
       (`{ sub, email, emailVerified }`), the `VerifyIdToken` type, and
       `makeGoogleVerifier(clientId)`, which calls
       `OAuth2Client.verifyIdToken({ idToken, audience: clientId })` and maps
       `email_verified` to `emailVerified`. Any failure, or a payload without
       `sub` or `email`, throws `HttpError(401, "Invalid sign-in token")`.
-- [ ] 3.5 Refactor; the tests stay green. `createApp({ config, logger,
+- [x] 3.5 Refactor; the tests stay green. `createApp({ config, logger,
       verifyIdToken })`, and `index.ts` passes
       `makeGoogleVerifier(config.googleClientId)`. In `helpers.ts`, add
       `fakeVerifier` (`"valid:<email>"` gives
@@ -416,7 +416,7 @@ Each step: write the test, watch it fail, then make it pass.
       `makeTestApp({ logger? })`, which returns `{ app, config }` built from
       `testConfig()`, the fake verifier and a silent logger. `app.test.ts` and
       `health.test.ts` build their app with it after `connectTestDb()`.
-- [ ] 3.6 `app.test.ts`: on `POST /auth/google` with the test `Origin`,
+- [x] 3.6 `app.test.ts`: on `POST /auth/google` with the test `Origin`,
       malformed JSON gives 400 and a body over 100 KB gives 413, both
       `{ error: "Invalid request body", requestId }`; a JSON POST with no
       `Origin` gives 403. This mounts `express.json()` and the write guard on

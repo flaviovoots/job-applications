@@ -1,13 +1,16 @@
 import request from "supertest";
-import { describe, expect, it } from "vitest";
-import { createApp } from "../src/app.js";
-import { createLogger } from "../src/http/logger.js";
-import { testConfig } from "./helpers.js";
+import type { Express } from "express";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { connectTestDb, disconnectTestDb, makeTestApp } from "./helpers.js";
 
-const app = createApp({
-  config: testConfig(),
-  logger: createLogger({ level: "silent" }),
+let app: Express;
+
+beforeAll(async () => {
+  await connectTestDb();
+  ({ app } = makeTestApp());
 });
+
+afterAll(disconnectTestDb);
 
 const requestIdPattern = /^[0-9a-f-]{36}$/;
 
@@ -88,5 +91,36 @@ describe("createApp", () => {
       "strict-origin-when-cross-origin",
     );
     expect(res.headers["x-request-id"]).toMatch(requestIdPattern);
+  });
+
+  it.each([
+    { name: "malformed JSON", body: "{", status: 400 },
+    {
+      name: "a body over 100 KB",
+      body: JSON.stringify({ a: "x".repeat(100 * 1024) }),
+      status: 413,
+    },
+  ])("POST /auth/google with $name gives $status", async ({ body, status }) => {
+    const res = await request(app)
+      .post("/auth/google")
+      .set("Origin", "http://localhost:5173")
+      .type("json")
+      .send(body);
+
+    expect(res.status).toBe(status);
+    expect(res.body).toEqual({
+      error: "Invalid request body",
+      requestId: expect.stringMatching(requestIdPattern),
+    });
+  });
+
+  it("refuses a JSON POST with no Origin with 403", async () => {
+    const res = await request(app).post("/auth/google").send({});
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({
+      error: "Forbidden",
+      requestId: expect.stringMatching(requestIdPattern),
+    });
   });
 });
