@@ -8,6 +8,10 @@ export default defineConfig({
   envDir: "..",
   envPrefix: ["VITE_", "GOOGLE_CLIENT_ID"],
   server: {
+    // APP_ORIGIN and Google's authorized origins name this port, so a taken
+    // port stops Vite instead of moving it.
+    port: 5173,
+    strictPort: true,
     proxy: {
       "/api": "http://localhost:3000",
       "/auth": "http://localhost:3000",

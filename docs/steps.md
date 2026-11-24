@@ -328,7 +328,10 @@ session that ends shows the banner, not the sign-in page (4.3); `signOut()`
 sets `['me']` to `null` and removes every other query, because `clear()`
 would also remove `['me']` and leave the mounted hooks showing the email; a
 failed `POST /auth/logout` makes `signOut()` throw and change nothing, since
-the cookie may still be valid (4.5).
+the cookie may still be valid (4.5); `client/vite.config.ts` sets port 5173
+with `strictPort`, because when 5173 was taken Vite moved to 5174, and the
+write guard refused that `Origin` with a 403, which the sign-in page shows as
+"not allowed" (5.2).
 
 ### Start
 
@@ -534,12 +537,12 @@ Each step: write the test, watch it fail, then make it pass.
       server." and a "Try again" button, which refetches `['me']` (a 200 then
       shows the email). While `['me']` loads, App shows nothing. When
       `['me']` is signed out mid-session, the banner shows above the page.
-- [ ] Commit point: client sign-in.
+- [x] Commit point: client sign-in.
 
 ### Local check
 
-- [ ] 5.1 Run `pnpm check`.
-- [ ] 5.2 Run `pnpm dev:server` and `pnpm dev:client`. At
+- [x] 5.1 Run `pnpm check`.
+- [x] 5.2 Run `pnpm dev:server` and `pnpm dev:client`. At
       `http://localhost:5173`: sign in with the author's account (the header
       shows the email; DevTools shows `sid` with `HttpOnly` and `Lax`, without
       `Secure`); restart `dev:server` and reload (still signed in: the session
