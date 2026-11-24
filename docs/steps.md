@@ -337,7 +337,10 @@ flashed at full width before the iframe arrived: `GoogleButton` sizes any
 `svg` in its container to 18px, and `style-src` stays without
 `'unsafe-inline'`; the other console lines at 5.3 are harmless (a 401 from
 `GET /api/me` while signed out, Brave blocking `play.google.com/log`, and
-COOP's report-only "would block" from Google's popup) (5.3).
+COOP's report-only "would block" from Google's popup) (5.3); no iPhone was at
+hand, and the Pixel 9 ran S2.1 to S2.4 in Brave, so the iPhone Safari and
+Android Chrome runs come before Stage 3's merge to `main`, as a step in
+Stage 3's list (6.4).
 
 ### Start
 
@@ -566,17 +569,17 @@ Each step: write the test, watch it fail, then make it pass.
 
 - [x] 6.1 Add S2.1 to S2.4 to `docs/acceptance-checklist.md` (desktop,
       iPhone Safari and Android Chrome).
-- [ ] Commit point: Stage 2 checklist lines.
-- [ ] 6.2 In Render's environment, add `SESSION_SECRET` (the production one),
+- [x] Commit point: Stage 2 checklist lines.
+- [x] 6.2 In Render's environment, add `SESSION_SECRET` (the production one),
       `GOOGLE_CLIENT_ID`, `ALLOWED_EMAILS` and
       `APP_ORIGIN=https://jobs.<domain>`, with "Save only": the merge
       deploys. The build reads `GOOGLE_CLIENT_ID` too, so it must be set
       before 6.3.
-- [ ] 6.3 Merge `dev` into `main` and push. Check that `/healthz` shows
+- [x] 6.3 Merge `dev` into `main` and push. Check that `/healthz` shows
       `main`'s SHA.
-- [ ] 6.4 Run S2.1 to S2.4 on each device, and add one run log row per device
+- [x] 6.4 Run S2.1 to S2.4 on each device, and add one run log row per device
       and browser.
-- [ ] 6.5 Add a decision log entry: the setup guide check (1.4), anything
+- [x] 6.5 Add a decision log entry: the setup guide check (1.4), anything
       Google's console or the phones did differently from the design, and the
       changes listed at the top of this stage. Tick the steps.
 - [ ] Commit point: Stage 2 results (stays on `dev` until Stage 3's merge).

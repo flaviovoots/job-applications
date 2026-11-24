@@ -30,3 +30,5 @@ example `S1.1 pass, S1.2 fail`.
 | Date | Commit | Device and browser | Results | Notes |
 | --- | --- | --- | --- | --- |
 | 2026-11-19 | 111beb2 | Desktop (Windows 11), Brave | S1.1 pass, S1.2 pass, S1.3 pass, S1.4 pass | Stage 1 lines only. |
+| 2026-11-24 | 25b7557 | Desktop (Windows 11), Brave | S2.1 pass, S2.2 pass, S2.3 pass, S2.4 pass | Stage 2 lines only. |
+| 2026-11-24 | 25b7557 | Android (Pixel 9), Brave | S2.1 pass, S2.2 pass, S2.3 pass, S2.4 pass | Stage 2 lines only. Brave, not Chrome: the Android Chrome and iPhone Safari runs come before Stage 3's merge to `main`. |
