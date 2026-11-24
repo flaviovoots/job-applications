@@ -560,11 +560,11 @@ Each step: write the test, watch it fail, then make it pass.
       `node --env-file=.env dist/server/src/index.js`). At
       `http://localhost:3000`, sign in and out: no CSP error in the console,
       and Google's popup closes after the account is picked.
-- [ ] 5.4 Push `dev` and check that CI passes.
+- [x] 5.4 Push `dev` and check that CI passes.
 
 ### Deploy
 
-- [ ] 6.1 Add S2.1 to S2.4 to `docs/acceptance-checklist.md` (desktop,
+- [x] 6.1 Add S2.1 to S2.4 to `docs/acceptance-checklist.md` (desktop,
       iPhone Safari and Android Chrome).
 - [ ] Commit point: Stage 2 checklist lines.
 - [ ] 6.2 In Render's environment, add `SESSION_SECRET` (the production one),

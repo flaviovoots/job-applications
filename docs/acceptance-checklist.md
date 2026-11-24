@@ -16,6 +16,10 @@ means it isn't.
 | S1.2 | 1 | Open `https://jobs.<domain>`. | The placeholder page, with a valid certificate. | yes | — | — |
 | S1.3 | 1 | Open `http://jobs.<domain>`. | Redirected to `https://`. | yes | — | — |
 | S1.4 | 1 | Open `https://<service>.onrender.com`. | Render's 404 page. | yes | — | — |
+| S2.1 | 2 | Sign in with the author's account. | The header shows the email. | yes | yes | yes |
+| S2.2 | 2 | Sign in with an account that is not on the list. | The refusal message. Desktop: DevTools shows no `sid` cookie. Phones: a reload still shows the sign-in page. | yes | yes | yes |
+| S2.3 | 2 | Sign out. | The sign-in page. | yes | yes | yes |
+| S2.4 | 2 | Sign in, redeploy from Render, wait for the deploy, then reload. | Still signed in. | yes | yes | yes |
 
 ## Run log
 
