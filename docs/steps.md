@@ -331,7 +331,13 @@ failed `POST /auth/logout` makes `signOut()` throw and change nothing, since
 the cookie may still be valid (4.5); `client/vite.config.ts` sets port 5173
 with `strictPort`, because when 5173 was taken Vite moved to 5174, and the
 write guard refused that `Origin` with a 403, which the sign-in page shows as
-"not allowed" (5.2).
+"not allowed" (5.2); Google's library adds a `<style>` tag and `style`
+attributes to its placeholder button, which `style-src` blocks, so its logo
+flashed at full width before the iframe arrived: `GoogleButton` sizes any
+`svg` in its container to 18px, and `style-src` stays without
+`'unsafe-inline'`; the other console lines at 5.3 are harmless (a 401 from
+`GET /api/me` while signed out, Brave blocking `play.google.com/log`, and
+COOP's report-only "would block" from Google's popup) (5.3).
 
 ### Start
 
@@ -548,7 +554,7 @@ Each step: write the test, watch it fail, then make it pass.
       `Secure`); restart `dev:server` and reload (still signed in: the session
       is in `jobs_dev`); Sign out (the sign-in page); sign in with the third
       account (the refusal message, and no `sid`).
-- [ ] 5.3 Run `pnpm build`, then the built server with `APP_ORIGIN` set to
+- [x] 5.3 Run `pnpm build`, then the built server with `APP_ORIGIN` set to
       `http://localhost:3000` in the shell, which wins over `.env`
       (PowerShell: `$env:APP_ORIGIN = "http://localhost:3000"`, then
       `node --env-file=.env dist/server/src/index.js`). At

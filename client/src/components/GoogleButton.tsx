@@ -49,5 +49,8 @@ export default function GoogleButton() {
     };
   }, []);
 
-  return <div ref={ref} />;
+  // Before its iframe arrives, Google draws a placeholder button here whose
+  // logo is sized by a <style> tag the CSP blocks. Unsized, the SVG fills the
+  // width, so this sets the size the placeholder would have.
+  return <div ref={ref} className="[&_svg]:size-[18px]" />;
 }
