@@ -600,11 +600,14 @@ messages in `MESSAGES` are "Required", "At most {n} characters", "Not
 allowed", "Must be text", "Must start with http:// or https://", "Not a valid
 option", "Use a real date (YYYY-MM-DD)" and "Can't be in the future"; a 400
 with `fields` has the `error` "Check the fields", and a body that isn't a
-JSON object gets "Invalid request body" (1.1); `client/src/api.ts` uses the
-shared `ApiErrorBody` instead of its own `ErrorBody` (1.3); `trashed()` waits
-for Stage 5 and `formatTime()` for Stage 4a, the first stages that use them
-(2.4, 3.1); the Stage 2 phone runs sit just before the merge, against the
-production commit `25b7557` (5.2).
+JSON object gets "Invalid request body" (1.1); `"Check the fields"` is
+`MESSAGES.checkFields`, since `input.ts` and `errors.ts` both send it (1.1);
+`client/src/api.ts` uses the shared `ApiErrorBody` instead of its own
+`ErrorBody` (1.3); `normalizeInput` also refuses an empty or `null` status
+with "Required", and an absent one keeps the schema's default (2.2);
+`trashed()` waits for Stage 5 and `formatTime()` for Stage 4a, the first
+stages that use them (2.4, 3.1); the Stage 2 phone runs sit just before the
+merge, against the production commit `25b7557` (5.2).
 
 ### Start
 
@@ -651,7 +654,7 @@ production commit `25b7557` (5.2).
 
 Each step: write the test, watch it fail, then make it pass.
 
-- [ ] 2.1 `server/test/dates.test.ts`, then `server/src/lib/dates.ts`.
+- [x] 2.1 `server/test/dates.test.ts`, then `server/src/lib/dates.ts`.
       `parseDay(s, now)` returns a UTC-midnight `Date`, or the message
       string: `2026-11-14` gives `Date.UTC(2026, 10, 14)`; `2026-02-30`,
       `2026-2-3` and `""` give "Use a real date (YYYY-MM-DD)". With `now` at
@@ -659,7 +662,7 @@ Each step: write the test, watch it fail, then make it pass.
       accepted and `2026-11-17` gives "Can't be in the future".
       `formatDay(date)` gives `YYYY-MM-DD` in UTC: `Date.UTC(2026, 10, 14)`
       gives `2026-11-14` although New York is still on the 13th.
-- [ ] 2.2 `server/test/input.test.ts`, then
+- [x] 2.2 `server/test/input.test.ts`, then
       `server/src/applications/input.ts`. `normalizeInput(body,
       { partial })` collects every field problem into one
       `HttpError(400, "Check the fields", fields)`; a body that isn't a plain
@@ -673,7 +676,7 @@ Each step: write the test, watch it fail, then make it pass.
       checked, so `{}` gives `{}`; `jobDescription` comes back with its
       bullets cleaned; a bad date gives the date message; `appliedDate`
       comes back as a `Date`.
-- [ ] Commit point: dates and input.
+- [x] Commit point: dates and input.
 - [ ] 2.3 `errors.test.ts`: a Mongoose `ValidationError` (from
       `validateSync()` on a small schema in the test, with two failing paths)
       gives 400 `{ error: "Check the fields", fields, requestId }` with one
