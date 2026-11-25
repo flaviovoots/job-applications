@@ -20,6 +20,9 @@ means it isn't.
 | S2.2 | 2 | Sign in with an account that is not on the list. | The refusal message. Desktop: DevTools shows no `sid` cookie. Phones: a reload still shows the sign-in page. | yes | yes | yes |
 | S2.3 | 2 | Sign out. | The sign-in page. | yes | yes | yes |
 | S2.4 | 2 | Sign in, redeploy from Render, wait for the deploy, then reload. | Still signed in. | yes | yes | yes |
+| S3.1 | 3 | Add an application with company and role only, with a company that says "Test". | It appears at the top of the list with status Saved. | yes | yes | yes |
+| S3.2 | 3 | Add one with a 151-character company. | "At most 150 characters" under Company, and the form keeps its values. | yes | yes | yes |
+| S3.3 | 3 | Open the list. Desktop: DevTools' responsive mode at 360 px. | Company, role and status only, with no sideways scrolling. | yes | yes | yes |
 
 ## Run log
 

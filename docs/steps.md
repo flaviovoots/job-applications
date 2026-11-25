@@ -772,8 +772,8 @@ Each step: write the test, watch it fail, then make it pass.
 
 ### Local check
 
-- [ ] 4.1 Run `pnpm check`.
-- [ ] 4.2 Run `pnpm dev:server` and `pnpm dev:client`. At
+- [x] 4.1 Run `pnpm check`.
+- [x] 4.2 Run `pnpm dev:server` and `pnpm dev:client`. At
       `http://localhost:5173`: add one with company and role only (top of
       the list, Saved); add one with a 151-character company (the message
       under Company, every value kept); add one with every field, pasting a
@@ -781,13 +781,13 @@ Each step: write the test, watch it fail, then make it pass.
       and the saved row sits in the default order). In DevTools' responsive
       mode at 360 px, the list shows company, role and status only, with no
       sideways scrolling.
-- [ ] 4.3 Push `dev` and check that CI passes.
+- [x] 4.3 Push `dev` and check that CI passes.
 
 ### Deploy
 
-- [ ] 5.1 Add S3.1 to S3.3 to `docs/acceptance-checklist.md` (desktop,
+- [x] 5.1 Add S3.1 to S3.3 to `docs/acceptance-checklist.md` (desktop,
       iPhone Safari and Android Chrome).
-- [ ] Commit point: Stage 3 checklist lines.
+- [x] Commit point: Stage 3 checklist lines.
 - [ ] 5.2 Stage 2's phone runs: on production, still `25b7557` until 5.3, run
       S2.1 to S2.4 in iPhone Safari and in Android Chrome, and add one run log
       row for each. S2.2 needs the third account; S2.4 needs a manual
