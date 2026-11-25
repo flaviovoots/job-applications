@@ -609,11 +609,11 @@ production commit `25b7557` (5.2).
 ### Start
 
 - [x] 0.1 Tick Stage 2's last commit point and write these steps.
-- [ ] Commit point: Stage 3 steps.
+- [x] Commit point: Stage 3 steps.
 
 ### Shared
 
-- [ ] 1.1 Type `shared/fields.ts` (data only, no test): `STATUSES`
+- [x] 1.1 Type `shared/fields.ts` (data only, no test): `STATUSES`
       (`saved`, `applied`, `interviewing`, `offer`, `rejected`, `withdrawn`,
       `no_response`, `as const`), `STATUS_LABELS` (Saved, Applied,
       Interviewing, Offer, Rejected, Withdrawn, No response),
@@ -627,12 +627,12 @@ production commit `25b7557` (5.2).
       in the list at the top of this stage; `tooLong(n)` builds "At most
       {n} characters" with the number formatted by `toLocaleString("en-US")`),
       and the types `Status`, `WorkMode` and `WritableField`. No `enum`.
-- [ ] 1.2 `shared/bullets.test.ts`, then `shared/bullets.ts`:
+- [x] 1.2 `shared/bullets.test.ts`, then `shared/bullets.ts`:
       `cleanBullets(text)` replaces `/(?<=\S)[ \t]*•/gu` with `"\n•"`.
       `a•b`, `a •b` and `a\t•b` each give `a\n•b`; `•a` and `a\n•b` are
       unchanged; running it twice gives the same result; text with no bullet
       is unchanged.
-- [ ] 1.3 Type `shared/api.ts`: `StatusHistoryEntry` (`{ status, changedAt }`,
+- [x] 1.3 Type `shared/api.ts`: `StatusHistoryEntry` (`{ status, changedAt }`,
       an ISO string), `ApplicationInput` (company and role `string`, status
       `Status`, workMode `WorkMode | null`, the other seven `string | null`,
       with `appliedDate` as `YYYY-MM-DD`), `ApplicationSummary` (`id, company,
@@ -645,7 +645,7 @@ production commit `25b7557` (5.2).
       (imports use the `.js` extension, as on the server). Run
       `pnpm typecheck` and `pnpm test`; if `tsc -b client` reports TS6307,
       add `../shared` to `client/tsconfig.app.json`'s `include`.
-- [ ] Commit point: shared fields and types.
+- [x] Commit point: shared fields and types.
 
 ### Server
 

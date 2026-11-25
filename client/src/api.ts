@@ -1,3 +1,4 @@
+import type { ApiErrorBody } from "../../shared/api.js";
 import { markSignedOut } from "./session";
 
 export class ApiError extends Error {
@@ -19,13 +20,6 @@ export class ApiError extends Error {
     this.fields = fields;
     this.requestId = requestId;
   }
-}
-
-// The server's error shape: { error, fields?, requestId }.
-interface ErrorBody {
-  error: string;
-  fields?: Record<string, string>;
-  requestId?: string;
 }
 
 export interface ApiFetchOptions {
@@ -73,7 +67,7 @@ export async function apiFetch<T>(
     // A 401 from /api/* means the session ended. One from /auth/* (a refused
     // sign-in) says nothing about the current session.
     if (res.status === 401 && path.startsWith("/api/")) markSignedOut();
-    const { error, fields, requestId } = data as ErrorBody;
+    const { error, fields, requestId } = data as ApiErrorBody;
     throw new ApiError(res.status, error, fields, requestId);
   }
   return data as T;
