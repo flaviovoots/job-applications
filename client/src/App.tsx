@@ -1,5 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
+import { Link, Route, Routes } from "react-router";
 import SignedOutBanner from "./components/SignedOutBanner";
+import ApplicationFormPage from "./pages/ApplicationFormPage";
+import ListPage from "./pages/ListPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import SignInPage from "./pages/SignInPage";
 import { signOut, useSession } from "./session";
 
@@ -11,6 +15,12 @@ function Header({ email }: { email: string }) {
   return (
     <header className="border-b border-gray-200">
       <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-end gap-x-4 gap-y-2 p-4">
+        <Link to="/" className="mr-auto font-semibold">
+          Job Applications Tracker
+        </Link>
+        <Link to="/applications/new" className="text-sm underline">
+          New
+        </Link>
         <span className="text-sm text-gray-700">{email}</span>
         <button
           type="button"
@@ -74,7 +84,11 @@ export default function App() {
       {session.signedOut && <SignedOutBanner />}
       <Header email={session.email} />
       <main className="mx-auto max-w-3xl p-4">
-        <h1 className="text-2xl font-semibold">Job Applications Tracker</h1>
+        <Routes>
+          <Route path="/" element={<ListPage />} />
+          <Route path="/applications/new" element={<ApplicationFormPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       </main>
     </>
   );

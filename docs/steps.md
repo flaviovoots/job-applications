@@ -734,7 +734,7 @@ Each step: write the test, watch it fail, then make it pass.
       with `toLocaleString("en-US")`), red (`text-red-700`) only when `n` is
       over the limit.
 - [x] Commit point: client helpers.
-- [ ] 3.4 `client/src/pages/ListPage.test.tsx`, then `ListPage.tsx`: loads
+- [x] 3.4 `client/src/pages/ListPage.test.tsx`, then `ListPage.tsx`: loads
       `['applications']` and shows a `<h1>` "Applications", a "New
       application" link to `/applications/new`, and a table with Company,
       Role and Status on all widths, and Location, Applied (`displayDay`) and
@@ -743,9 +743,9 @@ Each step: write the test, watch it fail, then make it pass.
       and status label; an empty list shows "No job applications yet. Add one
       to get started."; a failed load shows the `ApiError`'s message and a
       "Try again" button. While loading, it shows "Loading…".
-- [ ] 3.5 Type `client/src/pages/NotFoundPage.tsx`: a `<h1>` "Not found" and
+- [x] 3.5 Type `client/src/pages/NotFoundPage.tsx`: a `<h1>` "Not found" and
       a "Back to the list" link to `/`.
-- [ ] 3.6 `client/src/pages/ApplicationFormPage.test.tsx`, then
+- [x] 3.6 `client/src/pages/ApplicationFormPage.test.tsx`, then
       `ApplicationFormPage.tsx`: a `<h1>` "New application" and the eleven
       fields, labelled Company, Role, Status, Applied date, Job URL, Location,
       Salary range, Work mode, Next step, Job description and Cover letter.
@@ -762,13 +762,13 @@ Each step: write the test, watch it fail, then make it pass.
       banner; an HTML answer keeps every typed value and shows "Couldn't
       reach the server. Try again."; a second click while the POST is pending
       sends no second request.
-- [ ] 3.7 `App.test.tsx`, then `App.tsx`: routes `/` (`ListPage`),
+- [x] 3.7 `App.test.tsx`, then `App.tsx`: routes `/` (`ListPage`),
       `/applications/new` (`ApplicationFormPage`) and `*` (`NotFoundPage`).
       The header gains the app's name as a link to `/` and a "New" link to
       `/applications/new`; the placeholder heading goes. The Stage 2 cases
       that look for the placeholder heading look for the list's heading
       instead.
-- [ ] Commit point: list and create pages.
+- [x] Commit point: list and create pages.
 
 ### Local check
 

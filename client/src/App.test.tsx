@@ -17,23 +17,32 @@ import { jsonResponse, notSignedIn } from "./test/responses";
 const email = "alice@example.com";
 
 // Each test queues its fetch answers before this renders. The first one is
-// for GET /api/me.
+// for GET /api/me, the second for the list's GET /api/applications.
 async function renderSignedIn() {
   const rendered = renderWithProviders(<App />);
   await screen.findByText(email);
+  await screen.findByText(/No job applications yet/);
   return rendered;
 }
+
+const emptyList = () => jsonResponse(200, []);
 
 // A 401 from any /api/* call marks ['me'] signed out.
 async function endSessionMidUse() {
   await act(() => apiFetch("/api/applications").catch(() => undefined));
 }
 
-function heading() {
+// The sign-in page's heading.
+function appHeading() {
   return screen.getByRole("heading", {
     level: 1,
     name: "Job Applications Tracker",
   });
+}
+
+// The list's heading, which "/" shows once signed in.
+function listHeading() {
+  return screen.getByRole("heading", { level: 1, name: "Applications" });
 }
 
 // The <header> element's role is "banner"; SignedOutBanner's is "status".
@@ -58,14 +67,14 @@ describe("App", () => {
     const { container } = renderWithProviders(<App />);
 
     await waitForGoogleButton(container);
-    expect(heading()).toBeTruthy();
+    expect(appHeading()).toBeTruthy();
     expect(screen.queryByRole("banner")).toBeNull();
   });
 
   it("shows the email and Sign out in a header above the page when GET /api/me answers 200", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      jsonResponse(200, { email }),
-    );
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(200, { email }))
+      .mockResolvedValueOnce(emptyList());
 
     await renderSignedIn();
 
@@ -73,8 +82,38 @@ describe("App", () => {
     expect(
       within(header()).getByRole("button", { name: "Sign out" }),
     ).toBeTruthy();
-    expectAbove(header(), heading());
+    expectAbove(header(), listHeading());
     expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("links the app's name to the list and New to the create form", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(200, { email }))
+      .mockResolvedValueOnce(emptyList());
+
+    await renderSignedIn();
+
+    const link = (name: string) =>
+      within(header()).getByRole("link", { name }).getAttribute("href");
+    expect(link("Job Applications Tracker")).toBe("/");
+    expect(link("New")).toBe("/applications/new");
+  });
+
+  it("shows Not found at an unknown URL", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      jsonResponse(200, { email }),
+    );
+
+    renderWithProviders(<App />, { url: "/nowhere" });
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Not found" }),
+    ).toBeTruthy();
+    expect(
+      screen
+        .getByRole("link", { name: "Back to the list" })
+        .getAttribute("href"),
+    ).toBe("/");
   });
 
   it("shows nothing while GET /api/me loads", () => {
@@ -88,7 +127,8 @@ describe("App", () => {
   it("shows 'Couldn't reach the server.' when GET /api/me fails, and Try again refetches it", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockRejectedValueOnce(new TypeError("Failed to fetch"))
-      .mockResolvedValueOnce(jsonResponse(200, { email }));
+      .mockResolvedValueOnce(jsonResponse(200, { email }))
+      .mockResolvedValueOnce(emptyList());
     renderWithProviders(<App />);
 
     expect((await screen.findByRole("alert")).textContent).toBe(
@@ -104,6 +144,7 @@ describe("App", () => {
   it("keeps the page when a refetch of ['me'] fails mid-session", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(200, { email }))
+      .mockResolvedValueOnce(emptyList())
       .mockRejectedValueOnce(new TypeError("Failed to fetch"));
     await renderSignedIn();
 
@@ -122,13 +163,14 @@ describe("App", () => {
     it("shows the banner above the page and keeps the page", async () => {
       vi.spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(200, { email }))
+        .mockResolvedValueOnce(emptyList())
         .mockResolvedValueOnce(notSignedIn());
       await renderSignedIn();
 
       await endSessionMidUse();
 
       const banner = await screen.findByRole("status");
-      expectAbove(banner, heading());
+      expectAbove(banner, listHeading());
       await waitForGoogleButton(banner);
       expect(within(header()).getByText(email)).toBeTruthy();
     });
@@ -136,6 +178,7 @@ describe("App", () => {
     it("keeps the banner open after a refused re-sign-in", async () => {
       vi.spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(200, { email }))
+        .mockResolvedValueOnce(emptyList())
         .mockResolvedValueOnce(notSignedIn())
         .mockResolvedValueOnce(
           jsonResponse(403, { error: "Not allowed", requestId: "req-1" }),
@@ -155,8 +198,10 @@ describe("App", () => {
     it("closes the banner after a successful re-sign-in", async () => {
       vi.spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(200, { email }))
+        .mockResolvedValueOnce(emptyList())
         .mockResolvedValueOnce(notSignedIn())
-        .mockResolvedValueOnce(jsonResponse(200, { email }));
+        .mockResolvedValueOnce(jsonResponse(200, { email }))
+        .mockResolvedValueOnce(emptyList());
       await renderSignedIn();
       await endSessionMidUse();
       await screen.findByRole("status");
@@ -172,6 +217,7 @@ describe("App", () => {
     it("shows the sign-in page after POST /auth/logout succeeds", async () => {
       vi.spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(200, { email }))
+        .mockResolvedValueOnce(emptyList())
         .mockResolvedValueOnce(new Response(null, { status: 204 }));
       const { container } = await renderSignedIn();
 
@@ -185,6 +231,7 @@ describe("App", () => {
     it("stays signed in and says so when POST /auth/logout fails", async () => {
       vi.spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(200, { email }))
+        .mockResolvedValueOnce(emptyList())
         .mockRejectedValueOnce(new TypeError("Failed to fetch"));
       await renderSignedIn();
 
