@@ -582,4 +582,217 @@ Each step: write the test, watch it fail, then make it pass.
 - [x] 6.5 Add a decision log entry: the setup guide check (1.4), anything
       Google's console or the phones did differently from the design, and the
       changes listed at the top of this stage. Tick the steps.
-- [ ] Commit point: Stage 2 results (stays on `dev` until Stage 3's merge).
+- [x] Commit point: Stage 2 results (stays on `dev` until Stage 3's merge).
+
+## Stage 3: full schema, create and list
+
+Goal: on `https://jobs.<domain>`, the signed-in account adds an application
+with company and role only or with every field, sees it in the list in the
+default order, gets a message under the field for bad input with the form
+kept, and S3.1 to S3.3 pass on desktop, iPhone Safari and Android Chrome.
+Before the merge, S2.1 to S2.4 pass on iPhone Safari and Android Chrome
+(carried over from Stage 2's 6.4).
+
+Decided during the stage (recorded in the decision log at 5.5):
+the design's Stage 3 has no manual setup, so the only manual work is the
+local check, the carried-over phone runs and the checklist; the field
+messages in `MESSAGES` are "Required", "At most {n} characters", "Not
+allowed", "Must be text", "Must start with http:// or https://", "Not a valid
+option", "Use a real date (YYYY-MM-DD)" and "Can't be in the future"; a 400
+with `fields` has the `error` "Check the fields", and a body that isn't a
+JSON object gets "Invalid request body" (1.1); `client/src/api.ts` uses the
+shared `ApiErrorBody` instead of its own `ErrorBody` (1.3); `trashed()` waits
+for Stage 5 and `formatTime()` for Stage 4a, the first stages that use them
+(2.4, 3.1); the Stage 2 phone runs sit just before the merge, against the
+production commit `25b7557` (5.2).
+
+### Start
+
+- [x] 0.1 Tick Stage 2's last commit point and write these steps.
+- [ ] Commit point: Stage 3 steps.
+
+### Shared
+
+- [ ] 1.1 Type `shared/fields.ts` (data only, no test): `STATUSES`
+      (`saved`, `applied`, `interviewing`, `offer`, `rejected`, `withdrawn`,
+      `no_response`, `as const`), `STATUS_LABELS` (Saved, Applied,
+      Interviewing, Offer, Rejected, Withdrawn, No response),
+      `OPEN_STATUSES` (saved, applied, interviewing), `CLOSED_STATUSES` (the
+      other four), `WORK_MODES` (`remote`, `hybrid`, `onsite`) and
+      `WORK_MODE_LABELS` (Remote, Hybrid, On-site), `LIMITS` (company 150,
+      role 150, jobUrl 2048, location 150, salaryRange 100, nextStep 1000,
+      jobDescription 10000, coverLetter 10000, note 2000), `WRITABLE_FIELDS`
+      (company, role, status, appliedDate, jobUrl, location, salaryRange,
+      workMode, nextStep, jobDescription, coverLetter), `MESSAGES` (the texts
+      in the list at the top of this stage; `tooLong(n)` builds "At most
+      {n} characters" with the number formatted by `toLocaleString("en-US")`),
+      and the types `Status`, `WorkMode` and `WritableField`. No `enum`.
+- [ ] 1.2 `shared/bullets.test.ts`, then `shared/bullets.ts`:
+      `cleanBullets(text)` replaces `/(?<=\S)[ \t]*•/gu` with `"\n•"`.
+      `a•b`, `a •b` and `a\t•b` each give `a\n•b`; `•a` and `a\n•b` are
+      unchanged; running it twice gives the same result; text with no bullet
+      is unchanged.
+- [ ] 1.3 Type `shared/api.ts`: `StatusHistoryEntry` (`{ status, changedAt }`,
+      an ISO string), `ApplicationInput` (company and role `string`, status
+      `Status`, workMode `WorkMode | null`, the other seven `string | null`,
+      with `appliedDate` as `YYYY-MM-DD`), `ApplicationSummary` (`id, company,
+      role, status, appliedDate, location, workMode, salaryRange, nextStep,
+      createdAt`), `ApplicationDetail` (the summary plus `jobUrl,
+      jobDescription, coverLetter, statusHistory, deletedAt, updatedAt`; no
+      `notes` until Stage 4b) and `ApiErrorBody` (`{ error, fields?,
+      requestId }`). `client/src/api.ts` imports `ApiErrorBody` in place of
+      its local `ErrorBody`, which proves the client reaches `shared/`
+      (imports use the `.js` extension, as on the server). Run
+      `pnpm typecheck` and `pnpm test`; if `tsc -b client` reports TS6307,
+      add `../shared` to `client/tsconfig.app.json`'s `include`.
+- [ ] Commit point: shared fields and types.
+
+### Server
+
+Each step: write the test, watch it fail, then make it pass.
+
+- [ ] 2.1 `server/test/dates.test.ts`, then `server/src/lib/dates.ts`.
+      `parseDay(s, now)` returns a UTC-midnight `Date`, or the message
+      string: `2026-11-14` gives `Date.UTC(2026, 10, 14)`; `2026-02-30`,
+      `2026-2-3` and `""` give "Use a real date (YYYY-MM-DD)". With `now` at
+      `2026-11-14T23:30` New York time (`2026-11-15T04:30Z`), `2026-11-16` is
+      accepted and `2026-11-17` gives "Can't be in the future".
+      `formatDay(date)` gives `YYYY-MM-DD` in UTC: `Date.UTC(2026, 10, 14)`
+      gives `2026-11-14` although New York is still on the 13th.
+- [ ] 2.2 `server/test/input.test.ts`, then
+      `server/src/applications/input.ts`. `normalizeInput(body,
+      { partial })` collects every field problem into one
+      `HttpError(400, "Check the fields", fields)`; a body that isn't a plain
+      object (an array, a string, `null`) gives
+      `HttpError(400, "Invalid request body")`. Cases: `userId` and `notes`
+      give "Not allowed"; a number, an array and an object each give "Must
+      be text" for that field; strings are trimmed; an empty or `null`
+      optional field, `appliedDate` included, becomes `null`; on create
+      (`partial: false`) a missing, empty or `null` company or role gives
+      "Required", and on PATCH (`partial: true`) only the fields sent are
+      checked, so `{}` gives `{}`; `jobDescription` comes back with its
+      bullets cleaned; a bad date gives the date message; `appliedDate`
+      comes back as a `Date`.
+- [ ] Commit point: dates and input.
+- [ ] 2.3 `errors.test.ts`: a Mongoose `ValidationError` (from
+      `validateSync()` on a small schema in the test, with two failing paths)
+      gives 400 `{ error: "Check the fields", fields, requestId }` with one
+      message per path. This brings in the mapping in `errors.ts`.
+- [ ] 2.4 Add `buildInput(overrides)` to `helpers.ts`: a valid
+      `ApplicationInput` with every field filled.
+      `server/test/applications.test.ts`: signed in as Alice, `POST /api/applications` with company and role only
+      gives 201 with status `saved`, `statusHistory` of one
+      `{ status: "saved", changedAt }`, `appliedDate: null`, `deletedAt: null`,
+      and exactly the `ApplicationDetail` keys. This brings in `model.ts`
+      (the schema with messages from `MESSAGES`, the `statusHistory`
+      subschema with `_id: false`, the index, and the `toJSON` transform that
+      maps `_id` to `id`, drops `__v` and `userId`, and formats `appliedDate`
+      with `formatDay`), `repo.ts` (`active(userId)` and `create(userId,
+      input)`, which writes the first history entry; `trashed()` comes in
+      Stage 5) and `routes.ts`'s `POST /`, mounted by `createApp` on
+      `/api/applications` after `requireAuth`.
+- [ ] 2.5 `applications.test.ts`: `buildInput()` round-trips every field,
+      with `appliedDate` as `YYYY-MM-DD`; a create with status `applied` gives
+      a first history entry of `applied`.
+- [ ] 2.6 `applications.test.ts`: each of these gives 400
+      `{ error: "Check the fields", fields, requestId }` naming the field,
+      and writes no document: no company ("Required"); a 151-character role
+      ("At most 150 characters"); `jobUrl` `javascript:alert(1)` ("Must start
+      with http:// or https://"); `workMode` `"office"` and `status` `"done"`
+      ("Not a valid option"); `appliedDate` `2999-01-01` ("Can't be in the
+      future"); `"ab•".repeat(3000)` as the description, 9,000 characters that
+      cleanup turns into 12,000 ("At most 10,000 characters"); a posted
+      `userId` ("Not allowed"). The length, URL and option rules live in the
+      schema, with `runValidators` on later updates.
+- [ ] 2.7 `applications.test.ts`: `GET /api/applications` gives exactly the
+      `ApplicationSummary` keys for each row, and leaves out a row whose
+      `deletedAt` was set through the model. This brings in
+      `listActive(userId)` with a projection, and `routes.ts`'s `GET /`.
+- [ ] 2.8 `server/test/crossUser.test.ts`: Alice creates an application;
+      Bob's `GET /api/applications` doesn't include it.
+- [ ] Commit point: applications routes.
+
+### Client
+
+- [ ] 3.1 `client/src/lib/dates.test.ts`, then `client/src/lib/dates.ts`.
+      With `vi.useFakeTimers({ toFake: ["Date"] })` at `2026-11-14T23:30` New
+      York time, `todayLocal()` gives `2026-11-14`. `displayDay("2026-11-14")`
+      gives `Nov 14, 2026` (`en-US`, `dateStyle: "medium"`,
+      `timeZone: "UTC"`), so the day doesn't shift. `formatTime()` comes in
+      Stage 4a.
+- [ ] 3.2 `client/src/lib/listView.test.ts`, then `client/src/lib/listView.ts`:
+      `sortApplications(list)` returns a new array: rows with no applied date
+      first, then applied date newest first; ties (both empty, or the same
+      date) by `createdAt` newest first.
+- [ ] 3.3 Type `client/src/components/CharCounter.tsx`: `n / limit` (numbers
+      with `toLocaleString("en-US")`), red (`text-red-700`) only when `n` is
+      over the limit.
+- [ ] Commit point: client helpers.
+- [ ] 3.4 `client/src/pages/ListPage.test.tsx`, then `ListPage.tsx`: loads
+      `['applications']` and shows a `<h1>` "Applications", a "New
+      application" link to `/applications/new`, and a table with Company,
+      Role and Status on all widths, and Location, Applied (`displayDay`) and
+      Work mode (its label) from `sm` (`hidden sm:table-cell`). Cases: rows in
+      the default order from an unsorted response, each with company, role
+      and status label; an empty list shows "No job applications yet. Add one
+      to get started."; a failed load shows the `ApiError`'s message and a
+      "Try again" button. While loading, it shows "Loading…".
+- [ ] 3.5 Type `client/src/pages/NotFoundPage.tsx`: a `<h1>` "Not found" and
+      a "Back to the list" link to `/`.
+- [ ] 3.6 `client/src/pages/ApplicationFormPage.test.tsx`, then
+      `ApplicationFormPage.tsx`: a `<h1>` "New application" and the eleven
+      fields, labelled Company, Role, Status, Applied date, Job URL, Location,
+      Salary range, Work mode, Next step, Job description and Cover letter.
+      Status defaults to Saved; Work mode's empty option is "Not set" and
+      sends `null`; Applied date is `<input type="date">`; job description
+      and cover letter are textareas with a `CharCounter` (the description
+      counts `cleanBullets(value).length`). The form has `noValidate`, and no
+      `maxLength`, `required` or `pattern`. Each field message shows under its
+      field (`aria-describedby`); any other error shows above Save. Save
+      posts, then invalidates `['applications']` and goes to `/`; a "Cancel"
+      link goes to `/`. Cases, rendered through `App` at `/applications/new`
+      with `GET /api/me` answering 200: a 400 with `fields.company` shows
+      "Required" under Company; a 401 keeps every typed value and shows the
+      banner; an HTML answer keeps every typed value and shows "Couldn't
+      reach the server. Try again."; a second click while the POST is pending
+      sends no second request.
+- [ ] 3.7 `App.test.tsx`, then `App.tsx`: routes `/` (`ListPage`),
+      `/applications/new` (`ApplicationFormPage`) and `*` (`NotFoundPage`).
+      The header gains the app's name as a link to `/` and a "New" link to
+      `/applications/new`; the placeholder heading goes. The Stage 2 cases
+      that look for the placeholder heading look for the list's heading
+      instead.
+- [ ] Commit point: list and create pages.
+
+### Local check
+
+- [ ] 4.1 Run `pnpm check`.
+- [ ] 4.2 Run `pnpm dev:server` and `pnpm dev:client`. At
+      `http://localhost:5173`: add one with company and role only (top of
+      the list, Saved); add one with a 151-character company (the message
+      under Company, every value kept); add one with every field, pasting a
+      description with inline bullets (the counter counts the cleaned text,
+      and the saved row sits in the default order). In DevTools' responsive
+      mode at 360 px, the list shows company, role and status only, with no
+      sideways scrolling.
+- [ ] 4.3 Push `dev` and check that CI passes.
+
+### Deploy
+
+- [ ] 5.1 Add S3.1 to S3.3 to `docs/acceptance-checklist.md` (desktop,
+      iPhone Safari and Android Chrome).
+- [ ] Commit point: Stage 3 checklist lines.
+- [ ] 5.2 Stage 2's phone runs: on production, still `25b7557` until 5.3, run
+      S2.1 to S2.4 in iPhone Safari and in Android Chrome, and add one run log
+      row for each. S2.2 needs the third account; S2.4 needs a manual
+      redeploy from Render. This can happen any time before 5.3. A failure is
+      fixed on `dev` first and recorded for 5.5.
+- [ ] 5.3 Once 5.2 is ticked, merge `dev` into `main` and push. Check that
+      `/healthz` shows `main`'s SHA. No new environment variables.
+- [ ] 5.4 Run S3.1 to S3.3 on each device, and add one run log row per device
+      and browser. The applications they add stay in `jobs_prod` until Delete
+      forever arrives in Stage 5, so give them a company that says "Test".
+- [ ] 5.5 Add a decision log entry: the Stage 2 phone runs (5.2), anything the
+      phones did differently from the design, and the changes listed at the
+      top of this stage. Tick the steps.
+- [ ] Commit point: Stage 3 results (stays on `dev` until Stage 4a's merge).
