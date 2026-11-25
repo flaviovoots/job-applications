@@ -720,20 +720,20 @@ Each step: write the test, watch it fail, then make it pass.
 
 ### Client
 
-- [ ] 3.1 `client/src/lib/dates.test.ts`, then `client/src/lib/dates.ts`.
+- [x] 3.1 `client/src/lib/dates.test.ts`, then `client/src/lib/dates.ts`.
       With `vi.useFakeTimers({ toFake: ["Date"] })` at `2026-11-14T23:30` New
       York time, `todayLocal()` gives `2026-11-14`. `displayDay("2026-11-14")`
       gives `Nov 14, 2026` (`en-US`, `dateStyle: "medium"`,
       `timeZone: "UTC"`), so the day doesn't shift. `formatTime()` comes in
       Stage 4a.
-- [ ] 3.2 `client/src/lib/listView.test.ts`, then `client/src/lib/listView.ts`:
+- [x] 3.2 `client/src/lib/listView.test.ts`, then `client/src/lib/listView.ts`:
       `sortApplications(list)` returns a new array: rows with no applied date
       first, then applied date newest first; ties (both empty, or the same
       date) by `createdAt` newest first.
-- [ ] 3.3 Type `client/src/components/CharCounter.tsx`: `n / limit` (numbers
+- [x] 3.3 Type `client/src/components/CharCounter.tsx`: `n / limit` (numbers
       with `toLocaleString("en-US")`), red (`text-red-700`) only when `n` is
       over the limit.
-- [ ] Commit point: client helpers.
+- [x] Commit point: client helpers.
 - [ ] 3.4 `client/src/pages/ListPage.test.tsx`, then `ListPage.tsx`: loads
       `['applications']` and shows a `<h1>` "Applications", a "New
       application" link to `/applications/new`, and a table with Company,

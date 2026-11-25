@@ -1,3 +1,5 @@
+import type { ApplicationSummary } from "../../../shared/api.js";
+
 // A JSON answer with the Content-Type the server sends, for tests that mock
 // fetch.
 export function jsonResponse(status: number, body: unknown): Response {
@@ -5,6 +7,26 @@ export function jsonResponse(status: number, body: unknown): Response {
     status,
     headers: { "Content-Type": "application/json; charset=utf-8" },
   });
+}
+
+// A list row as GET /api/applications sends it, with only company and role
+// filled unless overrides say otherwise.
+export function buildSummary(
+  overrides: Partial<ApplicationSummary> = {},
+): ApplicationSummary {
+  return {
+    id: "app-1",
+    company: "Acme",
+    role: "Engineer",
+    status: "saved",
+    appliedDate: null,
+    location: null,
+    workMode: null,
+    salaryRange: null,
+    nextStep: null,
+    createdAt: "2026-11-01T12:00:00.000Z",
+    ...overrides,
+  };
 }
 
 // What requireAuth answers on /api/* without a session.
