@@ -6,6 +6,7 @@ import type request from "supertest";
 import { inject } from "vitest";
 import { fileURLToPath } from "node:url";
 import type { Logger } from "pino";
+import type { ApplicationInput } from "../../shared/api.js";
 import { createApp } from "../src/app.js";
 import type { VerifyIdToken } from "../src/auth/googleVerifier.js";
 import type { Config } from "../src/config.js";
@@ -87,6 +88,26 @@ export function captureStream() {
     },
   });
   return { lines, stream };
+}
+
+// A valid ApplicationInput with every field filled.
+export function buildInput(
+  overrides: Partial<ApplicationInput> = {},
+): ApplicationInput {
+  return {
+    company: "Acme",
+    role: "Engineer",
+    status: "applied",
+    appliedDate: "2026-11-10",
+    jobUrl: "https://acme.example/jobs/1",
+    location: "Lisbon",
+    salaryRange: "50k-60k",
+    workMode: "hybrid",
+    nextStep: "Wait for a reply",
+    jobDescription: "Build things.\n• TypeScript\n• MongoDB",
+    coverLetter: "Dear Acme,",
+    ...overrides,
+  };
 }
 
 // Makes the agent send the test Origin on every later request, then signs in.

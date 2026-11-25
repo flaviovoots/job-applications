@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
+import { MESSAGES } from "../../../shared/fields.js";
 
 export class HttpError extends Error {
   readonly status: number;
@@ -51,6 +52,13 @@ export function errorHandler(
   }
   if (err instanceof HttpError) {
     sendError(req, res, err.status, err.error, err.fields);
+    return;
+  }
+  if (err instanceof mongoose.Error.ValidationError) {
+    const fields = Object.fromEntries(
+      Object.entries(err.errors).map(([path, e]) => [path, e.message]),
+    );
+    sendError(req, res, 400, MESSAGES.checkFields, fields);
     return;
   }
   if (err instanceof mongoose.Error.CastError) {

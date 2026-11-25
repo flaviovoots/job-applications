@@ -3,6 +3,7 @@ import express, { type Express } from "express";
 import mongoose from "mongoose";
 import type { Logger } from "pino";
 import { pinoHttp } from "pino-http";
+import { applicationsRouter } from "./applications/routes.js";
 import { healthCheck } from "./http/health.js";
 import type { Config } from "./config.js";
 import type { VerifyIdToken } from "./auth/googleVerifier.js";
@@ -38,6 +39,7 @@ export function createApp({ config, logger, verifyIdToken }: AppDeps): Express {
   );
   app.use("/auth", authRouter({ verifyIdToken, getAllowlist }));
   app.use("/api", requireAuth(getAllowlist), meRouter());
+  app.use("/api/applications", applicationsRouter());
   app.use(["/api", "/auth"], apiNotFound);
   app.use(
     "/assets",

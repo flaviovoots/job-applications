@@ -56,6 +56,24 @@ describe("errorHandler", () => {
     expect(res.body).toEqual({ error: "Not found", requestId });
   });
 
+  it("answers a ValidationError with 400 and one message per path", async () => {
+    const schema = new mongoose.Schema({
+      company: { type: String, required: [true, "Required"] },
+      role: { type: String, maxlength: [3, "At most 3 characters"] },
+    });
+    const Model = mongoose.model("ValidationErrorTest", schema);
+    const err = new Model({ role: "abcd" }).validateSync();
+
+    const res = await request(appThrowing(err)).get("/");
+
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({
+      error: "Check the fields",
+      fields: { company: "Required", role: "At most 3 characters" },
+      requestId,
+    });
+  });
+
   it.each([
     ["a plain Error", new Error("boom")],
     [

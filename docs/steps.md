@@ -606,7 +606,10 @@ JSON object gets "Invalid request body" (1.1); `"Check the fields"` is
 `ErrorBody` (1.3); `normalizeInput` also refuses an empty or `null` status
 with "Required", and an absent one keeps the schema's default (2.2);
 `trashed()` waits for Stage 5 and `formatTime()` for Stage 4a, the first
-stages that use them (2.4, 3.1); the Stage 2 phone runs sit just before the
+stages that use them (2.4, 3.1); a history entry's `status` has no `enum` of
+its own, since it is always copied from a status that has just passed
+validation, and an `enum` there would also report a bad status as
+`statusHistory.0.status` (2.4); the Stage 2 phone runs sit just before the
 merge, against the production commit `25b7557` (5.2).
 
 ### Start
@@ -677,11 +680,11 @@ Each step: write the test, watch it fail, then make it pass.
       bullets cleaned; a bad date gives the date message; `appliedDate`
       comes back as a `Date`.
 - [x] Commit point: dates and input.
-- [ ] 2.3 `errors.test.ts`: a Mongoose `ValidationError` (from
+- [x] 2.3 `errors.test.ts`: a Mongoose `ValidationError` (from
       `validateSync()` on a small schema in the test, with two failing paths)
       gives 400 `{ error: "Check the fields", fields, requestId }` with one
       message per path. This brings in the mapping in `errors.ts`.
-- [ ] 2.4 Add `buildInput(overrides)` to `helpers.ts`: a valid
+- [x] 2.4 Add `buildInput(overrides)` to `helpers.ts`: a valid
       `ApplicationInput` with every field filled.
       `server/test/applications.test.ts`: signed in as Alice, `POST /api/applications` with company and role only
       gives 201 with status `saved`, `statusHistory` of one
@@ -694,10 +697,10 @@ Each step: write the test, watch it fail, then make it pass.
       input)`, which writes the first history entry; `trashed()` comes in
       Stage 5) and `routes.ts`'s `POST /`, mounted by `createApp` on
       `/api/applications` after `requireAuth`.
-- [ ] 2.5 `applications.test.ts`: `buildInput()` round-trips every field,
+- [x] 2.5 `applications.test.ts`: `buildInput()` round-trips every field,
       with `appliedDate` as `YYYY-MM-DD`; a create with status `applied` gives
       a first history entry of `applied`.
-- [ ] 2.6 `applications.test.ts`: each of these gives 400
+- [x] 2.6 `applications.test.ts`: each of these gives 400
       `{ error: "Check the fields", fields, requestId }` naming the field,
       and writes no document: no company ("Required"); a 151-character role
       ("At most 150 characters"); `jobUrl` `javascript:alert(1)` ("Must start
@@ -707,13 +710,13 @@ Each step: write the test, watch it fail, then make it pass.
       cleanup turns into 12,000 ("At most 10,000 characters"); a posted
       `userId` ("Not allowed"). The length, URL and option rules live in the
       schema, with `runValidators` on later updates.
-- [ ] 2.7 `applications.test.ts`: `GET /api/applications` gives exactly the
+- [x] 2.7 `applications.test.ts`: `GET /api/applications` gives exactly the
       `ApplicationSummary` keys for each row, and leaves out a row whose
       `deletedAt` was set through the model. This brings in
       `listActive(userId)` with a projection, and `routes.ts`'s `GET /`.
-- [ ] 2.8 `server/test/crossUser.test.ts`: Alice creates an application;
+- [x] 2.8 `server/test/crossUser.test.ts`: Alice creates an application;
       Bob's `GET /api/applications` doesn't include it.
-- [ ] Commit point: applications routes.
+- [x] Commit point: applications routes.
 
 ### Client
 
