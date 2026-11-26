@@ -795,11 +795,11 @@ Each step: write the test, watch it fail, then make it pass.
       S2.1 to S2.4 and S3.1 to S3.3 in iPhone Safari and in Android Chrome
       move to Stage 4a, before its merge. S2.2 needs the third account; S2.4
       needs a manual redeploy from Render.
-- [ ] 5.3 Merge `dev` into `main` and push. Check that `/healthz` shows
+- [x] 5.3 Merge `dev` into `main` and push. Check that `/healthz` shows
       `main`'s SHA. No new environment variables.
-- [ ] 5.4 Run S3.1 to S3.3 on desktop, and add one run log row. The
+- [x] 5.4 Run S3.1 to S3.3 on desktop, and add one run log row. The
       applications they add stay in `jobs_prod` until Delete forever arrives
       in Stage 5, so give them a company that says "Test".
-- [ ] 5.5 Add a decision log entry: the deferred phone runs (5.2) and the
+- [x] 5.5 Add a decision log entry: the deferred phone runs (5.2) and the
       changes listed at the top of this stage. Tick the steps.
 - [ ] Commit point: Stage 3 results (stays on `dev` until Stage 4a's merge).

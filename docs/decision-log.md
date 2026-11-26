@@ -4,6 +4,45 @@ Decisions made after the
 [design](designs/job_applications_tracker_design.md), newest first. Where an
 entry differs from the design, the entry wins.
 
+## 2026-11-26: Stage 3 results and changes to the design
+
+Results of Stage 3's production run, and changes to the Stage 3 table in
+"Detailed Implementation Plan", made during the stage.
+
+### Production run
+
+- The design's Stage 3 has no manual setup and no new environment variables,
+  so the only manual work was the local check and the checklist.
+- The merge deployed `97f27d0`, and `/healthz` showed it.
+- S3.1 to S3.3 passed on the desktop in Brave. The applications they added
+  stay in `jobs_prod`, with "Test" in the company, until Delete forever
+  arrives in Stage 5.
+- No iPhone or Android device was available. The iPhone Safari and Android
+  Chrome runs of S2.1 to S2.4 (carried over from Stage 2) and of S3.1 to S3.3
+  move to before Stage 4a's merge to `main`, against the production commit
+  `97f27d0`. Stage 3 merged after its desktop checks alone.
+
+### Changes to the Stage 3 table
+
+- The field messages in `MESSAGES` are "Required", "At most {n} characters",
+  "Not allowed", "Must be text", "Must start with http:// or https://", "Not
+  a valid option", "Use a real date (YYYY-MM-DD)" and "Can't be in the
+  future".
+- A 400 with `fields` has the `error` "Check the fields", which is
+  `MESSAGES.checkFields`, since `input.ts` and `errors.ts` both send it. A
+  body that isn't a JSON object gets "Invalid request body".
+- `client/src/api.ts` uses the shared `ApiErrorBody` instead of its own
+  `ErrorBody`.
+- `normalizeInput` also refuses an empty or `null` status with "Required";
+  an absent one keeps the schema's default.
+- A history entry's `status` has no `enum` of its own, since it is always
+  copied from a status that has just passed validation, and an `enum` there
+  would also report a bad status as `statusHistory.0.status`.
+- `trashed()` waits for Stage 5 and `formatTime()` for Stage 4a, the first
+  stages that use them.
+- Stage 3's closing docs commit stays on `dev` until Stage 4a's merge, so it
+  doesn't trigger a deploy.
+
 ## 2026-11-24: Stage 2 results and changes to the design
 
 Results of Stage 2's manual setup, header check and production run, and
