@@ -802,4 +802,203 @@ Each step: write the test, watch it fail, then make it pass.
       in Stage 5, so give them a company that says "Test".
 - [x] 5.5 Add a decision log entry: the deferred phone runs (5.2) and the
       changes listed at the top of this stage. Tick the steps.
-- [ ] Commit point: Stage 3 results (stays on `dev` until Stage 4a's merge).
+- [x] Commit point: Stage 3 results (stays on `dev` until Stage 4a's merge).
+
+## Stage 4a: detail, edit, status change, timeline and Move to Trash
+
+Goal: on `https://jobs.<domain>`, the signed-in account opens an application
+from the list, edits it, changes its status in the quick status control (with
+the applied date rule), sees the timeline oldest first in local time, and
+moves it to Trash; another account's URL shows "Not found"; and S4a.1 to S4a.7
+pass on desktop, iPhone Safari and Android Chrome. Before the merge, the phone
+runs carried over from Stages 2 and 3 pass on production `97f27d0`.
+
+Decided during the stage (recorded in the decision log at 4.5):
+the applied date rule also runs in the create form, since the form's status
+select has one change handler for both modes; the detail page shows every
+field, with "Not set" for an empty one; `formatTime(iso)` gives
+`Nov 14, 2026, 11:30 PM` (`en-US`, `dateStyle: "medium"`,
+`timeStyle: "short"`, the browser's zone); the quick status control's Save is
+enabled only when the status or the date differs from the stored one, and its
+PATCH holds only what changed; a PATCH of `{}` gives 200 with the document
+unchanged (a test the design doesn't list); after a PATCH the client
+invalidates `['applications']` and `['application', id]`, and after Move to
+Trash it removes `['application', id]` and invalidates `['applications']`
+(`['trash']` joins in Stage 5, the first stage that has it); the copy is "Edit
+application" (the edit form's `<h1>`), "Edit" and "Move to Trash" (the detail
+page's actions), "Save status" (the quick status control) and "Timeline" (its
+`<h2>`).
+
+### Start
+
+- [x] 0.1 Tick Stage 3's last commit point and write these steps.
+- [ ] Commit point: Stage 4a steps.
+
+### Server
+
+Each step: write the test, watch it fail, then make it pass.
+
+- [ ] 1.1 `applications.test.ts`: `GET /api/applications/:id` on Alice's
+      application gives 200 with exactly the `ApplicationDetail` keys and
+      `deletedAt: null`; an id that matches nothing
+      (`new mongoose.Types.ObjectId()`) and a malformed id (`nope`) each give
+      404 `{ error: "Not found", requestId }`. This brings in
+      `getActive(userId, id)` (`findOne` on `active(userId)` plus `_id`) and
+      `routes.ts`'s `GET /:id`, which turns `null` into
+      `HttpError(404, "Not found")`. The malformed id reaches the error
+      handler as a `CastError`.
+- [ ] 1.2 `applications.test.ts`, PATCH without a status:
+      `{ location: "Lisbon" }` gives 200 with the new location, and every
+      other field and `statusHistory` as before; `{ location: null }` clears
+      it; `{ company: null }` gives 400 with `fields.company` "Required";
+      `{ company: 5 }` gives 400 "Must be text"; a 151-character role gives
+      400 "At most 150 characters" (the schema's check, so it proves
+      `runValidators`); `{}` gives 200 with the document unchanged; an id that
+      matches nothing and a malformed id each give 404. This brings in
+      `updateActive(userId, id, fields, nextStatus?)`'s fields-only update
+      (`findOneAndUpdate` with `returnDocument: "after"` and
+      `runValidators: true`) and `PATCH /:id`, which calls
+      `normalizeInput(body, { partial: true })` and passes `status` apart
+      from the other fields.
+- [ ] 1.3 `applications.test.ts`, status changes, with
+      `vi.useFakeTimers({ toFake: ["Date"] })` and `vi.setSystemTime()`:
+      `{ status: "applied" }` on a Saved application appends one
+      `{ status: "applied", changedAt }` with the faked time; sending it again
+      adds no entry; two PATCHes of `interviewing` sent at once
+      (`Promise.all`) add exactly one entry; the current status sent with
+      `location: "Porto"` changes the location and adds no entry;
+      `{ status: "done" }` gives 400 "Not a valid option". This brings in the
+      `nextStatus` path from "Main flows" in the design: one atomic
+      status-and-history update filtered on `status: { $ne: next }`, then the
+      fields-only update when it matched nothing.
+- [ ] 1.4 `applications.test.ts`: `DELETE /api/applications/:id` gives 204;
+      after it, the detail gives 404, the list leaves the row out, and the
+      document (read through the model) has `deletedAt` set and the same
+      `statusHistory`; a second DELETE gives 404, and so does a malformed id.
+      This brings in `trash(userId, id)` (`updateOne` on `active(userId)` plus
+      `_id`, with `$set: { deletedAt: new Date() }`; the route turns a
+      `matchedCount` of 0 into a 404) and `DELETE /:id`.
+- [ ] 1.5 `crossUser.test.ts`: Bob gets 404 on Alice's `GET`, `PATCH` and
+      `DELETE /api/applications/:id`, and her document is unchanged after
+      them.
+- [ ] Commit point: application id routes.
+
+### Client
+
+- [ ] 2.1 `client/src/lib/dates.test.ts`, then `dates.ts`: in New York,
+      `formatTime("2026-11-15T04:30:00.000Z")` gives `Nov 14, 2026, 11:30 PM`
+      (`en-US`, `dateStyle: "medium"`, `timeStyle: "short"`, no `timeZone`,
+      so the browser's zone).
+- [ ] 2.2 `client/src/lib/appliedDateRule.test.ts`, then `appliedDateRule.ts`:
+      `nextAppliedDate(nextStatus: Status, currentDate: string, today:
+      string): string`, with `""` for an empty date. `applied` with `""`
+      gives `today`; `applied` with `2026-11-01` keeps it; `interviewing`
+      with `""` gives `""`; `saved` with `2026-11-14` (applied back to saved)
+      keeps the date.
+- [ ] 2.3 `ApplicationFormPage.test.tsx`, then `ApplicationFormPage.tsx`, in
+      create mode, with `Date` faked as in `dates.test.ts`: choosing
+      Applied with an empty Applied date fills in `todayLocal()`; choosing
+      Applied with a date keeps it; the filled date can still be changed. The
+      status select's change handler calls `nextAppliedDate`.
+- [ ] Commit point: time format and applied date rule.
+- [ ] 2.4 `client/src/components/Timeline.test.tsx`, then `Timeline.tsx`:
+      `Timeline({ history }: { history: StatusHistoryEntry[] })` shows a
+      `<h2>` "Timeline" and an `<ol>`, one item per entry with its status
+      label and `formatTime(changedAt)`. Entries out of order in the data
+      render oldest first (a sorted copy; the ISO strings from the server
+      compare correctly as text), in New York time. The label shows alone
+      until Stage 6 adds `StatusBadge`.
+- [ ] 2.5 Add `buildDetail(overrides)` to `client/src/test/responses.ts`: an
+      `ApplicationDetail` with company and role, status `saved`, a one-entry
+      history and every optional field `null`.
+      `client/src/components/QuickStatus.test.tsx`, then `QuickStatus.tsx`:
+      `QuickStatus({ application }: { application: ApplicationDetail })`,
+      with a Status select and an Applied date input. Cases, with the faked
+      `Date`: on a Saved application with no date, choosing Applied fills in
+      today's local date, and the user can change it; "Save status" sends one
+      PATCH holding only the changed values
+      (`{ status: "applied", appliedDate: "2026-11-14" }`); Save is disabled
+      with no changes, and while the PATCH is pending (a second click sends
+      nothing); a 400 shows the field message under its control, and any
+      other error shows next to Save, with the chosen values kept. On success
+      it invalidates `['applications']` and `['application', id]`. The
+      detail page renders it with `key={application.updatedAt}`, so a saved
+      change resets its state from the new data.
+- [ ] 2.6 `client/src/pages/DetailPage.test.tsx`, then `DetailPage.tsx`,
+      rendered through `App` at `/applications/:id` with `GET /api/me`
+      answering 200; `App.tsx` gains the route. It loads `['application', id]`
+      from `GET /api/applications/:id`, and shows the company as the `<h1>`
+      with the role under it, then a `<dl>`: Status (its label), Applied date
+      (`displayDay`), Job URL (a safe link: `target="_blank"
+      rel="noopener noreferrer"`), Location, Salary range, Work mode (its
+      label), Next step, Job description and Cover letter (both with
+      `whitespace-pre-wrap`), with "Not set" for an empty field. Below it:
+      `QuickStatus`, `Timeline`, an "Edit" link to `/applications/:id/edit`
+      and a "Move to Trash" button (no confirmation), which sends the DELETE,
+      removes `['application', id]`, invalidates `['applications']` and goes
+      to `/`; it is disabled while pending, and a failure shows the error's
+      message and stays. While loading it shows "Loading…"; a 404 shows
+      `NotFoundPage`; any other failure shows the message and "Try again", as
+      on the list. Cases: the fields and the timeline render, with "Not set"
+      for an empty field and the job URL's `target` and `rel`; a 404 shows
+      "Not found"; Move to Trash sends a DELETE and shows the list's heading.
+- [ ] 2.7 `ListPage.test.tsx`, then `ListPage.tsx`: each row's company cell
+      holds the row's one link, to `/applications/<id>`. Its hit area is
+      stretched over the row (`relative` on the `<tr>`; `after:absolute
+      after:inset-0` on the link), with a visible focus ring, so a tap
+      anywhere on the row opens the detail page and Tab stops once per row.
+      The stretch is browser-only: S4a.1 is its check.
+- [ ] Commit point: detail page.
+- [ ] 2.8 `ApplicationFormPage.test.tsx`, then `ApplicationFormPage.tsx`, in
+      edit mode at `/applications/:id/edit` (`App.tsx` gains the route). It
+      loads `['application', id]`, shows "Loading…" meanwhile and
+      `NotFoundPage` on a 404, then renders the form with a `<h1>` "Edit
+      application" and the stored values (`null` as `""`). The form moves
+      into an inner component that takes its initial values, so its state
+      starts from the loaded detail. Save sends only the changed fields as a
+      PATCH, then invalidates `['applications']` and `['application', id]`
+      and goes to `/applications/:id`; with no changes it sends nothing and
+      goes there too. "Cancel" links to `/applications/:id`. Cases: changing
+      the location sends a PATCH holding only `{ location }` and shows the
+      detail page; saving with no changes sends no request and shows the
+      detail page; a 401 on Save keeps every typed value and shows the banner
+      (CUJ 11 in the design); a 404 on load shows "Not found".
+- [ ] Commit point: edit form.
+
+### Local check
+
+- [ ] 3.1 Run `pnpm check`.
+- [ ] 3.2 Run `pnpm dev:server` and `pnpm dev:client`. At
+      `http://localhost:5173`: open an application by clicking its role cell,
+      not the company (the stretched link); Tab through the list (one stop
+      per row, with a visible focus ring); edit the location (the detail page
+      and the list show it); on a Saved one with no date, choose Applied in
+      the quick status control (today's local date fills in), then Save
+      status (the timeline gains an entry in local time, and the row moves
+      into date order); change the status again (the timeline reads oldest
+      first); add one with the job description `Skills: • A • B` (each bullet
+      starts a line on the detail page); Move to Trash (back on the list,
+      without it). In DevTools' responsive mode at 360 px, the detail page
+      has no sideways scrolling.
+- [ ] 3.3 Push `dev` and check that CI passes.
+
+### Deploy
+
+- [ ] 4.1 Add S4a.1 to S4a.7 to `docs/acceptance-checklist.md` (desktop,
+      iPhone Safari and Android Chrome).
+- [ ] Commit point: Stage 4a checklist lines.
+- [ ] 4.2 Before the merge, run the phone runs carried over from Stages 2 and
+      3 on production `97f27d0`: S2.1 to S2.4 and S3.1 to S3.3, in iPhone
+      Safari and in Android Chrome, with one run log row per device and
+      browser. S2.2 needs the third account. S2.4 needs a manual redeploy
+      from Render ("Deploy latest commit", which redeploys `97f27d0`). A
+      failure is fixed on `dev` before the merge.
+- [ ] 4.3 Merge `dev` into `main` and push. Check that `/healthz` shows
+      `main`'s SHA. No new environment variables.
+- [ ] 4.4 Run S4a.1 to S4a.7 on desktop, iPhone Safari and Android Chrome,
+      with one run log row per device and browser. S4a.6 uses the second
+      account. The applications the runs add stay in `jobs_prod` until
+      Stage 5, so give them a company that says "Test".
+- [ ] 4.5 Add a decision log entry: the phone runs (4.2) and the changes
+      listed at the top of this stage. Tick the steps.
+- [ ] Commit point: Stage 4a results (stays on `dev` until Stage 4b's merge).
