@@ -589,9 +589,10 @@ Each step: write the test, watch it fail, then make it pass.
 Goal: on `https://jobs.<domain>`, the signed-in account adds an application
 with company and role only or with every field, sees it in the list in the
 default order, gets a message under the field for bad input with the form
-kept, and S3.1 to S3.3 pass on desktop, iPhone Safari and Android Chrome.
-Before the merge, S2.1 to S2.4 pass on iPhone Safari and Android Chrome
-(carried over from Stage 2's 6.4).
+kept, and S3.1 to S3.3 pass on desktop. The phone runs (S2.1 to S2.4,
+carried over from Stage 2's 6.4, and S3.1 to S3.3, in iPhone Safari and
+Android Chrome) wait until the devices are available, and must pass before
+Stage 4a's merge (5.2).
 
 Decided during the stage (recorded in the decision log at 5.5):
 the design's Stage 3 has no manual setup, so the only manual work is the
@@ -610,7 +611,9 @@ stages that use them (2.4, 3.1); a history entry's `status` has no `enum` of
 its own, since it is always copied from a status that has just passed
 validation, and an `enum` there would also report a bad status as
 `statusHistory.0.status` (2.4); the Stage 2 phone runs sit just before the
-merge, against the production commit `25b7557` (5.2).
+merge, against the production commit `25b7557` (5.2); with no phones
+available, those runs and Stage 3's own phone runs move to before Stage 4a's
+merge, and Stage 3 merges after its desktop checks alone (5.2).
 
 ### Start
 
@@ -788,17 +791,15 @@ Each step: write the test, watch it fail, then make it pass.
 - [x] 5.1 Add S3.1 to S3.3 to `docs/acceptance-checklist.md` (desktop,
       iPhone Safari and Android Chrome).
 - [x] Commit point: Stage 3 checklist lines.
-- [ ] 5.2 Stage 2's phone runs: on production, still `25b7557` until 5.3, run
-      S2.1 to S2.4 in iPhone Safari and in Android Chrome, and add one run log
-      row for each. S2.2 needs the third account; S2.4 needs a manual
-      redeploy from Render. This can happen any time before 5.3. A failure is
-      fixed on `dev` first and recorded for 5.5.
-- [ ] 5.3 Once 5.2 is ticked, merge `dev` into `main` and push. Check that
-      `/healthz` shows `main`'s SHA. No new environment variables.
-- [ ] 5.4 Run S3.1 to S3.3 on each device, and add one run log row per device
-      and browser. The applications they add stay in `jobs_prod` until Delete
-      forever arrives in Stage 5, so give them a company that says "Test".
-- [ ] 5.5 Add a decision log entry: the Stage 2 phone runs (5.2), anything the
-      phones did differently from the design, and the changes listed at the
-      top of this stage. Tick the steps.
+- [x] 5.2 Phone runs deferred: no iPhone or Android device is available.
+      S2.1 to S2.4 and S3.1 to S3.3 in iPhone Safari and in Android Chrome
+      move to Stage 4a, before its merge. S2.2 needs the third account; S2.4
+      needs a manual redeploy from Render.
+- [ ] 5.3 Merge `dev` into `main` and push. Check that `/healthz` shows
+      `main`'s SHA. No new environment variables.
+- [ ] 5.4 Run S3.1 to S3.3 on desktop, and add one run log row. The
+      applications they add stay in `jobs_prod` until Delete forever arrives
+      in Stage 5, so give them a company that says "Test".
+- [ ] 5.5 Add a decision log entry: the deferred phone runs (5.2) and the
+      changes listed at the top of this stage. Tick the steps.
 - [ ] Commit point: Stage 3 results (stays on `dev` until Stage 4a's merge).
