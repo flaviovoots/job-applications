@@ -89,6 +89,10 @@ export default function App() {
           <Route path="/" element={<ListPage />} />
           <Route path="/applications/new" element={<ApplicationFormPage />} />
           <Route path="/applications/:id" element={<DetailPage />} />
+          <Route
+            path="/applications/:id/edit"
+            element={<ApplicationFormPage />}
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

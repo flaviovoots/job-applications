@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "../App";
 import { renderWithProviders } from "../test/render";
-import { jsonResponse, notSignedIn } from "../test/responses";
+import { buildDetail, jsonResponse, notSignedIn } from "../test/responses";
 
 const email = "alice@example.com";
 
@@ -223,6 +223,141 @@ describe("ApplicationFormPage", () => {
       setAppliedDate("2026-11-10");
 
       expect(field("Applied date").value).toBe("2026-11-10");
+    });
+  });
+
+  describe("edit mode", () => {
+    // Every stored value differs from what fillEveryField types.
+    const stored = buildDetail({
+      company: "Globex",
+      role: "Designer",
+      status: "interviewing",
+      appliedDate: "2026-11-05",
+      location: "Porto",
+      workMode: "hybrid",
+    });
+
+    // GET /api/me answers 200, then the detail's answer. Each test queues
+    // the answers after those.
+    async function renderEdit(detail: Response) {
+      const fetchSpy = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(200, { email }))
+        .mockResolvedValueOnce(detail);
+      renderWithProviders(<App />, { url: "/applications/app-1/edit" });
+      return fetchSpy;
+    }
+
+    async function renderLoaded() {
+      const fetchSpy = await renderEdit(jsonResponse(200, stored));
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Edit application",
+      });
+      return fetchSpy;
+    }
+
+    it("shows the stored values, with null as empty", async () => {
+      const fetchSpy = await renderLoaded();
+
+      expect(fetchSpy.mock.calls[1][0]).toBe("/api/applications/app-1");
+      expect(
+        Object.fromEntries(
+          Object.keys(typed).map((label) => [label, field(label).value]),
+        ),
+      ).toEqual({
+        Company: "Globex",
+        Role: "Designer",
+        Status: "interviewing",
+        "Applied date": "2026-11-05",
+        "Job URL": "",
+        Location: "Porto",
+        "Salary range": "",
+        "Work mode": "hybrid",
+        "Next step": "",
+        "Job description": "",
+        "Cover letter": "",
+      });
+      expect(
+        screen.getByRole("link", { name: "Cancel" }).getAttribute("href"),
+      ).toBe("/applications/app-1");
+    });
+
+    it("sends only the changed field, then shows the detail page", async () => {
+      const fetchSpy = await renderLoaded();
+      const updated = { ...stored, location: "Lisbon" };
+      fetchSpy
+        .mockResolvedValueOnce(jsonResponse(200, updated))
+        .mockResolvedValueOnce(jsonResponse(200, updated));
+      fireEvent.change(field("Location"), { target: { value: "Lisbon" } });
+
+      fireEvent.click(saveButton());
+
+      // The detail page shows the refetched value.
+      await screen.findByText("Lisbon", { selector: "dd" });
+      const [path, init] = fetchSpy.mock.calls[2];
+      expect(path).toBe("/api/applications/app-1");
+      expect(init?.method).toBe("PATCH");
+      expect(JSON.parse(init?.body as string)).toEqual({ location: "Lisbon" });
+    });
+
+    it("sends no PATCH with no changes, and shows the detail page", async () => {
+      const fetchSpy = await renderLoaded();
+      fetchSpy.mockResolvedValueOnce(jsonResponse(200, stored));
+
+      fireEvent.click(saveButton());
+
+      await screen.findByRole("heading", { level: 1, name: "Globex" });
+      // The detail page's refetch of its stale query is the only request.
+      expect(
+        fetchSpy.mock.calls
+          .slice(2)
+          .map(([path, init]) => [path, init?.method]),
+      ).toEqual([["/api/applications/app-1", "GET"]]);
+    });
+
+    it("keeps every typed value and shows the banner on a 401", async () => {
+      const fetchSpy = await renderLoaded();
+      fetchSpy.mockResolvedValueOnce(notSignedIn());
+      fillEveryField();
+
+      fireEvent.click(saveButton());
+
+      await screen.findByRole("status");
+      expect(fetchSpy.mock.calls[2][1]?.method).toBe("PATCH");
+      expectEveryFieldKept();
+    });
+
+    it("shows Not found on a 404", async () => {
+      await renderEdit(
+        jsonResponse(404, { error: "Not found", requestId: "req-1" }),
+      );
+
+      expect(
+        await screen.findByRole("heading", { level: 1, name: "Not found" }),
+      ).toBeTruthy();
+    });
+
+    it("shows another failure's message, and Try again loads it", async () => {
+      const fetchSpy = await renderEdit(
+        jsonResponse(500, {
+          error: "Something went wrong",
+          requestId: "req-1",
+        }),
+      );
+      fetchSpy.mockResolvedValueOnce(jsonResponse(200, stored));
+
+      expect((await screen.findByRole("alert")).textContent).toBe(
+        "Something went wrong",
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+      expect(
+        await screen.findByRole("heading", {
+          level: 1,
+          name: "Edit application",
+        }),
+      ).toBeTruthy();
     });
   });
 });

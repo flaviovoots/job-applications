@@ -824,7 +824,11 @@ PATCH holds only what changed; a PATCH of `{}` gives 200 with the document
 unchanged (a test the design doesn't list); after a PATCH the client
 invalidates `['applications']` and `['application', id]`, and after Move to
 Trash it removes `['application', id]` and invalidates `['applications']`
-(`['trash']` joins in Stage 5, the first stage that has it); the copy is "Edit
+(`['trash']` joins in Stage 5, the first stage that has it); the edit form
+shows a load failure other than a 404 with its message and "Try again", as
+the detail page does (a case step 2.8 didn't list), and its change check
+compares against the values the form opened with, so a refetch while editing
+never adds an untouched field to the PATCH; the copy is "Edit
 application" (the edit form's `<h1>`), "Edit" and "Move to Trash" (the detail
 page's actions), "Save status" (the quick status control) and "Timeline" (its
 `<h2>`); both `health.test.ts` cases wait for the session store's
@@ -954,21 +958,26 @@ Each step: write the test, watch it fail, then make it pass.
       anywhere on the row opens the detail page and Tab stops once per row.
       The stretch is browser-only: S4a.1 is its check.
 - [x] Commit point: detail page.
-- [ ] 2.8 `ApplicationFormPage.test.tsx`, then `ApplicationFormPage.tsx`, in
+- [x] 2.8 `ApplicationFormPage.test.tsx`, then `ApplicationFormPage.tsx`, in
       edit mode at `/applications/:id/edit` (`App.tsx` gains the route). It
-      loads `['application', id]`, shows "Loading…" meanwhile and
-      `NotFoundPage` on a 404, then renders the form with a `<h1>` "Edit
-      application" and the stored values (`null` as `""`). The form moves
-      into an inner component that takes its initial values, so its state
-      starts from the loaded detail. Save sends only the changed fields as a
-      PATCH, then invalidates `['applications']` and `['application', id]`
-      and goes to `/applications/:id`; with no changes it sends nothing and
-      goes there too. "Cancel" links to `/applications/:id`. Cases: changing
-      the location sends a PATCH holding only `{ location }` and shows the
-      detail page; saving with no changes sends no request and shows the
-      detail page; a 401 on Save keeps every typed value and shows the banner
-      (CUJ 11 in the design); a 404 on load shows "Not found".
-- [ ] Commit point: edit form.
+      loads `['application', id]`, shows "Loading…" meanwhile, `NotFoundPage`
+      on a 404 and any other failure's message with "Try again", as on the
+      detail page, then renders the form with a `<h1>` "Edit application"
+      and the stored values (`null` as `""`). The form moves into an inner
+      component that takes its initial values, so its state starts from the
+      loaded detail. Save sends only the fields that differ from the values
+      the form opened with as a PATCH, then invalidates `['applications']`
+      and `['application', id]` and goes to `/applications/:id`; with no
+      changes it sends nothing and goes there too. "Cancel" links to
+      `/applications/:id`. Cases: the stored values show, with `null` as
+      empty, and Cancel's link; changing the location sends a PATCH holding
+      only `{ location }` and the detail page shows the new value; saving
+      with no changes sends no PATCH (the detail page's refetch is the only
+      request) and shows the detail page; a 401 on Save keeps every typed
+      value and shows the banner (CUJ 11 in the design); a 404 on load shows
+      "Not found"; another load failure shows its message, and "Try again"
+      loads the form.
+- [x] Commit point: edit form.
 
 ### Local check
 
