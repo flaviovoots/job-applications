@@ -836,7 +836,9 @@ page's actions), "Save status" (the quick status control) and "Timeline" (its
 index in the background and a disconnect that cuts it off leaves an unhandled
 rejection, which Vitest reports as an error (a test-only fix: the degraded
 case first, then the db up case after the same failure in CI on `2062e47`;
-the other test files disconnect in `afterAll`, after the index is built).
+the other test files disconnect in `afterAll`, after the index is built);
+and on phones, S4a.2 turns the phone sideways before checking the list,
+since the list hides Location below 640 px.
 
 ### Start
 
@@ -981,8 +983,8 @@ Each step: write the test, watch it fail, then make it pass.
 
 ### Local check
 
-- [ ] 3.1 Run `pnpm check`.
-- [ ] 3.2 Run `pnpm dev:server` and `pnpm dev:client`. At
+- [x] 3.1 Run `pnpm check`.
+- [x] 3.2 Run `pnpm dev:server` and `pnpm dev:client`. At
       `http://localhost:5173`: open an application by clicking its role cell,
       not the company (the stretched link); Tab through the list (one stop
       per row, with a visible focus ring); edit the location (the detail page
@@ -994,13 +996,13 @@ Each step: write the test, watch it fail, then make it pass.
       starts a line on the detail page); Move to Trash (back on the list,
       without it). In DevTools' responsive mode at 360 px, the detail page
       has no sideways scrolling.
-- [ ] 3.3 Push `dev` and check that CI passes.
+- [x] 3.3 Push `dev` and check that CI passes.
 
 ### Deploy
 
-- [ ] 4.1 Add S4a.1 to S4a.7 to `docs/acceptance-checklist.md` (desktop,
+- [x] 4.1 Add S4a.1 to S4a.7 to `docs/acceptance-checklist.md` (desktop,
       iPhone Safari and Android Chrome).
-- [ ] Commit point: Stage 4a checklist lines.
+- [x] Commit point: Stage 4a checklist lines.
 - [ ] 4.2 Before the merge, run the phone runs carried over from Stages 2 and
       3 on production `97f27d0`: S2.1 to S2.4 and S3.1 to S3.3, in iPhone
       Safari and in Android Chrome, with one run log row per device and

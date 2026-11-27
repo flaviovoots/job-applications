@@ -23,6 +23,13 @@ means it isn't.
 | S3.1 | 3 | Add an application with company and role only, with a company that says "Test". | It appears at the top of the list with status Saved. | yes | yes | yes |
 | S3.2 | 3 | Add one with a 151-character company. | "At most 150 characters" under Company, and the form keeps its values. | yes | yes | yes |
 | S3.3 | 3 | Open the list. Desktop: DevTools' responsive mode at 360 px. | Company, role and status only, with no sideways scrolling. | yes | yes | yes |
+| S4a.1 | 4a | Tap a row on its role, not its company. Desktop: click it. | The detail page shows every field ("Not set" for an empty one), the quick status control, the timeline, Edit and Move to Trash. | yes | yes | yes |
+| S4a.2 | 4a | Edit the location and save. Phones: turn the phone sideways before checking the list. | The new location shows on the detail page and in the list. | yes | yes | yes |
+| S4a.3 | 4a | On a Saved application with no date, choose Applied in the quick status control, then Save status. | Choosing Applied fills in today's local date. After Save status, the row moves into date order in the list. | yes | yes | yes |
+| S4a.4 | 4a | Add one with a company that says "Test" and the job description `Skills: • A • B`. | On the detail page, each bullet starts a new line. | yes | yes | yes |
+| S4a.5 | 4a | Move a "Test" application to Trash. | Back on the list, which no longer shows it. | yes | yes | yes |
+| S4a.6 | 4a | Copy the URL of one of the author's applications, then sign in with the second account and open it. | "Not found". | yes | yes | yes |
+| S4a.7 | 4a | Change an application's status twice in the quick status control. | The timeline shows the first entry and both changes, oldest first, in local time. | yes | yes | yes |
 
 ## Run log
 
