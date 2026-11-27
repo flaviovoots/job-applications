@@ -1,4 +1,7 @@
-import type { ApplicationSummary } from "../../../shared/api.js";
+import type {
+  ApplicationDetail,
+  ApplicationSummary,
+} from "../../../shared/api.js";
 
 // A JSON answer with the Content-Type the server sends, for tests that mock
 // fetch.
@@ -25,6 +28,24 @@ export function buildSummary(
     salaryRange: null,
     nextStep: null,
     createdAt: "2026-11-01T12:00:00.000Z",
+    ...overrides,
+  };
+}
+
+// An application as GET /api/applications/:id sends it: a list row's fields,
+// a one-entry history, and every optional field null unless overrides say
+// otherwise.
+export function buildDetail(
+  overrides: Partial<ApplicationDetail> = {},
+): ApplicationDetail {
+  return {
+    ...buildSummary(),
+    jobUrl: null,
+    jobDescription: null,
+    coverLetter: null,
+    statusHistory: [{ status: "saved", changedAt: "2026-11-01T12:00:00.000Z" }],
+    deletedAt: null,
+    updatedAt: "2026-11-01T12:00:00.000Z",
     ...overrides,
   };
 }

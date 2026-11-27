@@ -72,6 +72,33 @@ describe("ListPage", () => {
     expect(within(rows[1]).getByText("On-site")).toBeTruthy();
   });
 
+  // The link's hit area stretches over the row in CSS, which jsdom doesn't
+  // lay out; S4a.1 checks that in a browser.
+  it("gives each row one link, in the company cell, to its detail page", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      jsonResponse(200, unsorted),
+    );
+
+    renderWithProviders(<ListPage />);
+
+    await screen.findByText("Acme");
+    for (const row of bodyRows()) {
+      const links = within(row).getAllByRole("link");
+      expect(links).toHaveLength(1);
+      expect(row.cells[0].contains(links[0])).toBe(true);
+      expect(links[0].textContent).toBe(row.cells[0].textContent);
+    }
+    expect(
+      bodyRows().map((row) =>
+        within(row).getByRole("link").getAttribute("href"),
+      ),
+    ).toEqual([
+      "/applications/none",
+      "/applications/newer",
+      "/applications/older",
+    ]);
+  });
+
   it("shows the empty state when there are no applications", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(200, []));
 

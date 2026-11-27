@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Link, Route, Routes } from "react-router";
 import SignedOutBanner from "./components/SignedOutBanner";
 import ApplicationFormPage from "./pages/ApplicationFormPage";
+import DetailPage from "./pages/DetailPage";
 import ListPage from "./pages/ListPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignInPage from "./pages/SignInPage";
@@ -87,6 +88,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<ListPage />} />
           <Route path="/applications/new" element={<ApplicationFormPage />} />
+          <Route path="/applications/:id" element={<DetailPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

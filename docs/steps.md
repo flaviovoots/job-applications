@@ -827,10 +827,12 @@ Trash it removes `['application', id]` and invalidates `['applications']`
 (`['trash']` joins in Stage 5, the first stage that has it); the copy is "Edit
 application" (the edit form's `<h1>`), "Edit" and "Move to Trash" (the detail
 page's actions), "Save status" (the quick status control) and "Timeline" (its
-`<h2>`); `health.test.ts`'s degraded case waits for the session store's
-`expires_1` TTL index before it disconnects, since connect-mongo creates that
+`<h2>`); both `health.test.ts` cases wait for the session store's
+`expires_1` TTL index before they disconnect, since connect-mongo creates that
 index in the background and a disconnect that cuts it off leaves an unhandled
-rejection, which Vitest reports as an error (a test-only fix).
+rejection, which Vitest reports as an error (a test-only fix: the degraded
+case first, then the db up case after the same failure in CI on `2062e47`;
+the other test files disconnect in `afterAll`, after the index is built).
 
 ### Start
 
@@ -903,15 +905,15 @@ Each step: write the test, watch it fail, then make it pass.
       Applied with an empty Applied date fills in `todayLocal()`; choosing
       Applied with a date keeps it; the filled date can still be changed. The
       status select's change handler calls `nextAppliedDate`.
-- [ ] Commit point: time format and applied date rule.
-- [ ] 2.4 `client/src/components/Timeline.test.tsx`, then `Timeline.tsx`:
+- [x] Commit point: time format and applied date rule.
+- [x] 2.4 `client/src/components/Timeline.test.tsx`, then `Timeline.tsx`:
       `Timeline({ history }: { history: StatusHistoryEntry[] })` shows a
       `<h2>` "Timeline" and an `<ol>`, one item per entry with its status
       label and `formatTime(changedAt)`. Entries out of order in the data
       render oldest first (a sorted copy; the ISO strings from the server
       compare correctly as text), in New York time. The label shows alone
       until Stage 6 adds `StatusBadge`.
-- [ ] 2.5 Add `buildDetail(overrides)` to `client/src/test/responses.ts`: an
+- [x] 2.5 Add `buildDetail(overrides)` to `client/src/test/responses.ts`: an
       `ApplicationDetail` with company and role, status `saved`, a one-entry
       history and every optional field `null`.
       `client/src/components/QuickStatus.test.tsx`, then `QuickStatus.tsx`:
@@ -927,7 +929,7 @@ Each step: write the test, watch it fail, then make it pass.
       it invalidates `['applications']` and `['application', id]`. The
       detail page renders it with `key={application.updatedAt}`, so a saved
       change resets its state from the new data.
-- [ ] 2.6 `client/src/pages/DetailPage.test.tsx`, then `DetailPage.tsx`,
+- [x] 2.6 `client/src/pages/DetailPage.test.tsx`, then `DetailPage.tsx`,
       rendered through `App` at `/applications/:id` with `GET /api/me`
       answering 200; `App.tsx` gains the route. It loads `['application', id]`
       from `GET /api/applications/:id`, and shows the company as the `<h1>`
@@ -945,13 +947,13 @@ Each step: write the test, watch it fail, then make it pass.
       on the list. Cases: the fields and the timeline render, with "Not set"
       for an empty field and the job URL's `target` and `rel`; a 404 shows
       "Not found"; Move to Trash sends a DELETE and shows the list's heading.
-- [ ] 2.7 `ListPage.test.tsx`, then `ListPage.tsx`: each row's company cell
+- [x] 2.7 `ListPage.test.tsx`, then `ListPage.tsx`: each row's company cell
       holds the row's one link, to `/applications/<id>`. Its hit area is
       stretched over the row (`relative` on the `<tr>`; `after:absolute
       after:inset-0` on the link), with a visible focus ring, so a tap
       anywhere on the row opens the detail page and Tab stops once per row.
       The stretch is browser-only: S4a.1 is its check.
-- [ ] Commit point: detail page.
+- [x] Commit point: detail page.
 - [ ] 2.8 `ApplicationFormPage.test.tsx`, then `ApplicationFormPage.tsx`, in
       edit mode at `/applications/:id/edit` (`App.tsx` gains the route). It
       loads `['application', id]`, shows "Loading…" meanwhile and

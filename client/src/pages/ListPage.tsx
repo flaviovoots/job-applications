@@ -10,6 +10,12 @@ import { sortApplications } from "../lib/listView";
 // fit a phone without sideways scrolling.
 const wide = "hidden sm:table-cell";
 
+// The row's one link. Its ::after box covers the row (the <tr> is relative),
+// so a tap anywhere on the row opens the detail page and Tab stops once per
+// row. The focus ring is drawn on that box, around the whole row.
+const rowLink =
+  "after:absolute after:inset-0 after:outline-blue-600 focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-2";
+
 function Table({ list }: { list: ApplicationSummary[] }) {
   return (
     <table className="w-full text-left text-sm wrap-anywhere">
@@ -25,8 +31,15 @@ function Table({ list }: { list: ApplicationSummary[] }) {
       </thead>
       <tbody>
         {sortApplications(list).map((row) => (
-          <tr key={row.id} className="border-b border-gray-200">
-            <td className="py-2 pr-3 font-medium">{row.company}</td>
+          <tr
+            key={row.id}
+            className="relative border-b border-gray-200 hover:bg-gray-50"
+          >
+            <td className="py-2 pr-3 font-medium">
+              <Link to={`/applications/${row.id}`} className={rowLink}>
+                {row.company}
+              </Link>
+            </td>
             <td className="py-2 pr-3">{row.role}</td>
             <td className="py-2 pr-3">{STATUS_LABELS[row.status]}</td>
             <td className={`${wide} py-2 pr-3`}>{row.location}</td>
