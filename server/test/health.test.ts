@@ -20,6 +20,7 @@ describe("GET /healthz", () => {
     await connectTestDb();
     onTestFinished(disconnectTestDb);
     const { app } = makeTestApp();
+    await sessionIndexReady();
 
     const res = await request(app).get("/healthz");
 
