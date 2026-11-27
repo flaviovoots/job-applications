@@ -16,3 +16,14 @@ const dayFormat = new Intl.DateTimeFormat("en-US", {
 export function displayDay(yyyyMmDd: string): string {
   return dayFormat.format(new Date(yyyyMmDd));
 }
+
+// No timeZone, so the browser's own zone applies.
+const timeFormat = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+// An ISO instant (such as a status change's changedAt) in local time.
+export function formatTime(iso: string): string {
+  return timeFormat.format(new Date(iso));
+}

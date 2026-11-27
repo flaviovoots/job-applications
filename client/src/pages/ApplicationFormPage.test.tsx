@@ -60,6 +60,7 @@ async function renderForm() {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -178,5 +179,50 @@ describe("ApplicationFormPage", () => {
     fireEvent.click(saveButton());
 
     expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  describe("applied date rule", () => {
+    // 23:30 in New York on 2026-11-14 is already 2026-11-15 in UTC. Date is
+    // faked after the render, so only the change handlers see it.
+    async function renderFormOnNov14() {
+      await renderForm();
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-11-14T23:30:00-05:00"));
+    }
+
+    function chooseStatus(value: string) {
+      fireEvent.change(field("Status"), { target: { value } });
+    }
+
+    function setAppliedDate(value: string) {
+      fireEvent.change(field("Applied date"), { target: { value } });
+    }
+
+    it("fills in today's local date on choosing Applied with no date", async () => {
+      await renderFormOnNov14();
+
+      chooseStatus("applied");
+
+      expect(field("Applied date").value).toBe("2026-11-14");
+    });
+
+    it("keeps a date already set on choosing Applied", async () => {
+      await renderFormOnNov14();
+      setAppliedDate("2026-11-01");
+
+      chooseStatus("applied");
+
+      expect(field("Applied date").value).toBe("2026-11-01");
+    });
+
+    it("lets the user change the filled date", async () => {
+      await renderFormOnNov14();
+      chooseStatus("applied");
+      expect(field("Applied date").value).toBe("2026-11-14");
+
+      setAppliedDate("2026-11-10");
+
+      expect(field("Applied date").value).toBe("2026-11-10");
+    });
   });
 });

@@ -827,18 +827,21 @@ Trash it removes `['application', id]` and invalidates `['applications']`
 (`['trash']` joins in Stage 5, the first stage that has it); the copy is "Edit
 application" (the edit form's `<h1>`), "Edit" and "Move to Trash" (the detail
 page's actions), "Save status" (the quick status control) and "Timeline" (its
-`<h2>`).
+`<h2>`); `health.test.ts`'s degraded case waits for the session store's
+`expires_1` TTL index before it disconnects, since connect-mongo creates that
+index in the background and a disconnect that cuts it off leaves an unhandled
+rejection, which Vitest reports as an error (a test-only fix).
 
 ### Start
 
 - [x] 0.1 Tick Stage 3's last commit point and write these steps.
-- [ ] Commit point: Stage 4a steps.
+- [x] Commit point: Stage 4a steps.
 
 ### Server
 
 Each step: write the test, watch it fail, then make it pass.
 
-- [ ] 1.1 `applications.test.ts`: `GET /api/applications/:id` on Alice's
+- [x] 1.1 `applications.test.ts`: `GET /api/applications/:id` on Alice's
       application gives 200 with exactly the `ApplicationDetail` keys and
       `deletedAt: null`; an id that matches nothing
       (`new mongoose.Types.ObjectId()`) and a malformed id (`nope`) each give
@@ -847,7 +850,7 @@ Each step: write the test, watch it fail, then make it pass.
       `routes.ts`'s `GET /:id`, which turns `null` into
       `HttpError(404, "Not found")`. The malformed id reaches the error
       handler as a `CastError`.
-- [ ] 1.2 `applications.test.ts`, PATCH without a status:
+- [x] 1.2 `applications.test.ts`, PATCH without a status:
       `{ location: "Lisbon" }` gives 200 with the new location, and every
       other field and `statusHistory` as before; `{ location: null }` clears
       it; `{ company: null }` gives 400 with `fields.company` "Required";
@@ -860,7 +863,7 @@ Each step: write the test, watch it fail, then make it pass.
       `runValidators: true`) and `PATCH /:id`, which calls
       `normalizeInput(body, { partial: true })` and passes `status` apart
       from the other fields.
-- [ ] 1.3 `applications.test.ts`, status changes, with
+- [x] 1.3 `applications.test.ts`, status changes, with
       `vi.useFakeTimers({ toFake: ["Date"] })` and `vi.setSystemTime()`:
       `{ status: "applied" }` on a Saved application appends one
       `{ status: "applied", changedAt }` with the faked time; sending it again
@@ -871,31 +874,31 @@ Each step: write the test, watch it fail, then make it pass.
       `nextStatus` path from "Main flows" in the design: one atomic
       status-and-history update filtered on `status: { $ne: next }`, then the
       fields-only update when it matched nothing.
-- [ ] 1.4 `applications.test.ts`: `DELETE /api/applications/:id` gives 204;
+- [x] 1.4 `applications.test.ts`: `DELETE /api/applications/:id` gives 204;
       after it, the detail gives 404, the list leaves the row out, and the
       document (read through the model) has `deletedAt` set and the same
       `statusHistory`; a second DELETE gives 404, and so does a malformed id.
       This brings in `trash(userId, id)` (`updateOne` on `active(userId)` plus
       `_id`, with `$set: { deletedAt: new Date() }`; the route turns a
       `matchedCount` of 0 into a 404) and `DELETE /:id`.
-- [ ] 1.5 `crossUser.test.ts`: Bob gets 404 on Alice's `GET`, `PATCH` and
+- [x] 1.5 `crossUser.test.ts`: Bob gets 404 on Alice's `GET`, `PATCH` and
       `DELETE /api/applications/:id`, and her document is unchanged after
       them.
-- [ ] Commit point: application id routes.
+- [x] Commit point: application id routes.
 
 ### Client
 
-- [ ] 2.1 `client/src/lib/dates.test.ts`, then `dates.ts`: in New York,
+- [x] 2.1 `client/src/lib/dates.test.ts`, then `dates.ts`: in New York,
       `formatTime("2026-11-15T04:30:00.000Z")` gives `Nov 14, 2026, 11:30 PM`
       (`en-US`, `dateStyle: "medium"`, `timeStyle: "short"`, no `timeZone`,
       so the browser's zone).
-- [ ] 2.2 `client/src/lib/appliedDateRule.test.ts`, then `appliedDateRule.ts`:
+- [x] 2.2 `client/src/lib/appliedDateRule.test.ts`, then `appliedDateRule.ts`:
       `nextAppliedDate(nextStatus: Status, currentDate: string, today:
       string): string`, with `""` for an empty date. `applied` with `""`
       gives `today`; `applied` with `2026-11-01` keeps it; `interviewing`
       with `""` gives `""`; `saved` with `2026-11-14` (applied back to saved)
       keeps the date.
-- [ ] 2.3 `ApplicationFormPage.test.tsx`, then `ApplicationFormPage.tsx`, in
+- [x] 2.3 `ApplicationFormPage.test.tsx`, then `ApplicationFormPage.tsx`, in
       create mode, with `Date` faked as in `dates.test.ts`: choosing
       Applied with an empty Applied date fills in `todayLocal()`; choosing
       Applied with a date keeps it; the filled date can still be changed. The

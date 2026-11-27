@@ -23,6 +23,8 @@ import {
 } from "../../../shared/fields.js";
 import { ApiError, apiFetch } from "../api";
 import CharCounter from "../components/CharCounter";
+import { nextAppliedDate } from "../lib/appliedDateRule";
+import { todayLocal } from "../lib/dates";
 
 type Values = Record<WritableField, string>;
 
@@ -93,6 +95,17 @@ export default function ApplicationFormPage() {
     };
   }
 
+  // The status select's own handler, for the applied date rule.
+  function onStatusChange(e: ChangeEvent<HTMLSelectElement>) {
+    const status = e.target.value as Status;
+    const today = todayLocal();
+    setValues((current) => ({
+      ...current,
+      status,
+      appliedDate: nextAppliedDate(status, current.appliedDate, today),
+    }));
+  }
+
   // A label, the control (children), and the field's message under it.
   function field(name: WritableField, label: string, children: ReactNode) {
     const message = fieldMessages?.[name];
@@ -127,7 +140,7 @@ export default function ApplicationFormPage() {
         {field(
           "status",
           "Status",
-          <select {...control("status")}>
+          <select {...control("status")} onChange={onStatusChange}>
             {STATUSES.map((status) => (
               <option key={status} value={status}>
                 {STATUS_LABELS[status]}
